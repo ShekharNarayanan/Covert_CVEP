@@ -6,8 +6,7 @@
 Python implementation of a keyboard for the noise-tagging project.
 """
 '''Notes:
-Press Q to quit// color later
-Used add_text_field to add a '+' between the two classes chosen''
+Press Q to quit// color later'''
 
 import os, json
 import numpy as np
@@ -17,6 +16,7 @@ from psychopy import core
 import math
 
 
+# add text stim "+" in the center 
 
 class Keyboard(object):
     """
@@ -154,6 +154,9 @@ class Keyboard(object):
             color=text_color, fillColor=field_color, alignment="left", 
             autoDraw=True, autoLog=False)
         
+        # self.fields[name] = self.fields[name] = visual.TextStim(win=self.window,text=text,units="pix", pos=pos, size=size, letterHeight=0.5*size[1], 
+        #     color=text_color, fillColor=field_color, alignment="left", 
+        #     autoDraw=True, autoLog=False)
         
 
     def set_field_text(self, name, text):
@@ -247,7 +250,7 @@ class Keyboard(object):
         core.quit()
 
 # change n to 15
-def test(n_trials=5, code="onoff"):# modul gold codes 
+def test(n_trials, code="onoff"):# modul gold codes 
     """
     Example experiment with initial setup and highlighting and presenting a few trials.
     """
@@ -255,7 +258,7 @@ def test(n_trials=5, code="onoff"):# modul gold codes
     STREAM = False
     SCREEN = 0 # change for projection 
     SCREEN_SIZE = (1536, 864)# # Mac: (1792, 1120), LabPC: (1920, 1080), HP: 1536, 864
-    SCREEN_WIDTH = 36  # Mac: (34,5), LabPC: 53.0, 35.94
+    SCREEN_WIDTH = 34  # Mac: (34,5), LabPC: 53.0, 35.94
     SCREEN_DISTANCE = 60.0
     SCREEN_COLOR = (0, 0, 0)
     FR = 60  # screen frame rate
@@ -270,8 +273,8 @@ def test(n_trials=5, code="onoff"):# modul gold codes
     KEY_HEIGHT = 3.0
     KEY_SPACE = 10
     KEY_COLORS = ["black", "white", "green", "blue"]
-    KEYS = ["Y", 
-            "N"]
+    KEYS = ["N", 
+            "Y"]
     
 
     CUE_TIME = 0.8
@@ -299,24 +302,30 @@ def test(n_trials=5, code="onoff"):# modul gold codes
     y_pos = SCREEN_SIZE[1] / 2 - TEXT_FIELD_HEIGHT * ppd / 2
     keyboard.add_text_field("text", "", (SCREEN_SIZE[0] - STT_WIDTH * ppd, TEXT_FIELD_HEIGHT * ppd), (x_pos, y_pos), (0, 0, 0), (-1, -1, -1))
     
-    keyboard.add_text_field(None, "+",((SCREEN_SIZE[0] - STT_WIDTH * ppd)/2, (TEXT_FIELD_HEIGHT * ppd)/2),(SCREEN_SIZE[0]/5,0),(0, 0, 0), (-1, -1, -1) )
+    keyboard.add_text_field(None, "+",((STT_WIDTH * ppd, STT_HEIGHT * ppd)),(0,0),(0, 0, 0), (-1, -1, -1) )
+    
+    print("the cross is placed at",SCREEN_WIDTH/2)
+    
   
     
     
     for key_i in range(len(KEYS)):
         
         key_2_add = KEYS[key_i]
-        y_pos = (0.5)* ppd - TEXT_FIELD_HEIGHT * ppd
+        y_pos = -(0.5)* ppd - TEXT_FIELD_HEIGHT * ppd
         
         if key_i==1:
-            x_pos = (-1)*(KEY_WIDTH + KEY_SPACE) * ppd  
+            x_pos = (-1)*(KEY_WIDTH + KEY_SPACE) * ppd 
+            print("x pos1 is", x_pos) 
+            print("x pos1 difference from cross is",abs(x_pos)-SCREEN_WIDTH/2)
         else:
             x_pos = (1)*(KEY_WIDTH + KEY_SPACE) * ppd 
-            
+            print("xpos 2 is",x_pos)
+            print("x pos2 difference from cross is",abs(x_pos)-SCREEN_WIDTH/2)
         images = [f"images/{KEYS[key_i]}_{color}.png" for color in KEY_COLORS]
         keyboard.add_key(KEYS[key_i], (KEY_WIDTH * ppd, KEY_HEIGHT * ppd), (x_pos, y_pos), images)
         
-       
+    
     
         
         
@@ -371,7 +380,7 @@ def test(n_trials=5, code="onoff"):# modul gold codes
     # Loop trials
     text = ""
     for i_trial in range(n_trials):
-        
+        print("i trial is",i_trial)
         # Set target
         # target = np.random.randint(0, 32)
         target = np.random.randint(0,2)
@@ -428,4 +437,5 @@ if __name__ == "__main__":
     parser.add_argument("-n", "--ntrials", type=int, help="number of trials", default=5)
     parser.add_argument("-c", "--code", type=str, help="code set to use", default="onoff")
     args = parser.parse_args()
-    test(n_trials=args.ntrials, code=args.code)
+    args.ntrials = 1
+    test(n_trials=1, code=args.code)
