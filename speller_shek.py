@@ -316,9 +316,7 @@ def test(n_trials=5, code="onoff"):# modul gold codes
         images = [f"images/{KEYS[key_i]}_{color}.png" for color in KEY_COLORS]
         keyboard.add_key(KEYS[key_i], (KEY_WIDTH * ppd, KEY_HEIGHT * ppd), (x_pos, y_pos), images)
         
-        txt_stim = visual.TextStim(win=window,text="+",pos=(0,0.5*ppd),color='black')
-        txt_stim.draw()
-        # window.flip() 
+       
     
         
         
