@@ -16,7 +16,6 @@ from psychopy import core
 import math
 
 
-# add text stim "+" in the center 
 
 class Keyboard(object):
     """
@@ -154,9 +153,6 @@ class Keyboard(object):
             color=text_color, fillColor=field_color, alignment="left", 
             autoDraw=True, autoLog=False)
         
-        # self.fields[name] = self.fields[name] = visual.TextStim(win=self.window,text=text,units="pix", pos=pos, size=size, letterHeight=0.5*size[1], 
-        #     color=text_color, fillColor=field_color, alignment="left", 
-        #     autoDraw=True, autoLog=False)
         
 
     def set_field_text(self, name, text):
