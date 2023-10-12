@@ -6,7 +6,8 @@
 Python implementation of a keyboard for the noise-tagging project.
 """
 '''Notes:
-Press Q to quit// color later'''
+Press Q to quit// color later
+Used add_text_field to add a '+' between the two classes chosen''
 
 import os, json
 import numpy as np
