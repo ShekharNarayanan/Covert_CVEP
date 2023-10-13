@@ -255,40 +255,37 @@ def test(n_trials, code="onoff"):# modul gold codes
     Example experiment with initial setup and highlighting and presenting a few trials.
     """
 
-    STREAM = False
+    STREAM = True # when actually testing
     SCREEN = 0 # change for projection 
-    SCREEN_SIZE = (1536, 864)# # Mac: (1792, 1120), LabPC: (1920, 1080), HP: 1536, 864
-    SCREEN_WIDTH = 34  # Mac: (34,5), LabPC: 53.0, 35.94
+    SCREEN_SIZE = (1920, 1080)# # Mac: (1792, 1120), LabPC: (1920, 1080), HP: 1536, 864
+    SCREEN_WIDTH = 53.0  # Mac: (34,5), LabPC: 53.0, 35.94
     SCREEN_DISTANCE = 60.0
     SCREEN_COLOR = (0, 0, 0)
     FR = 60  # screen frame rate
     PR = 60  # codes presentation rate
     
-    STT_WIDTH = 2.2
-    STT_HEIGHT = 2.2
+    STT_WIDTH = 2.2 # adjust later
+    STT_HEIGHT = 3 #2.2
 
     TEXT_FIELD_HEIGHT = 3.0
 
     KEY_WIDTH = 3.0
     KEY_HEIGHT = 3.0
-    KEY_SPACE = 10
+    KEY_SPACE = 12
     KEY_COLORS = ["black", "white", "green", "blue"]
     KEYS = ["N", 
             "Y"]
     
 
-    CUE_TIME = 0.8
-    TRIAL_TIME = 4.2 # 10 for overt// dk for covert
-    FEEDBACK_TIME = 0.5
-    ITI_TIME = 0.5
+    CUE_TIME = 1  #0.8
+    TRIAL_TIME = 10.5 # 10 for overt// dk for covert, 5 reps
+    FEEDBACK_TIME = 0#0.5 -->  feedback is blue; cue is green
+    ITI_TIME = 0#0.5
 
     # Initialize keyboard
     keyboard = Keyboard(size=SCREEN_SIZE, width=SCREEN_WIDTH, distance=SCREEN_DISTANCE, screen=SCREEN, window_color=SCREEN_COLOR, stream=STREAM)
     ppd = keyboard.get_pixels_per_degree()
-    
-    # adding the plus sign between stimuli
-    window = visual.Window(size=SCREEN_SIZE, winType='pyglet', fullscr=False)
-    
+   
     
 
     # Add stimulus timing tracker at left top of the screen
@@ -316,12 +313,12 @@ def test(n_trials, code="onoff"):# modul gold codes
         
         if key_i==1:
             x_pos = (-1)*(KEY_WIDTH + KEY_SPACE) * ppd 
-            print("x pos1 is", x_pos) 
-            print("x pos1 difference from cross is",abs(x_pos)-SCREEN_WIDTH/2)
+            # print("x pos1 is", x_pos) 
+            # print("x pos1 difference from cross is",abs(x_pos)-SCREEN_WIDTH/2)
         else:
             x_pos = (1)*(KEY_WIDTH + KEY_SPACE) * ppd 
-            print("xpos 2 is",x_pos)
-            print("x pos2 difference from cross is",abs(x_pos)-SCREEN_WIDTH/2)
+            # print("xpos 2 is",x_pos)
+            # print("x pos2 difference from cross is",abs(x_pos)-SCREEN_WIDTH/2)
         images = [f"images/{KEYS[key_i]}_{color}.png" for color in KEY_COLORS]
         keyboard.add_key(KEYS[key_i], (KEY_WIDTH * ppd, KEY_HEIGHT * ppd), (x_pos, y_pos), images)
         
@@ -335,13 +332,14 @@ def test(n_trials, code="onoff"):# modul gold codes
         tmp = np.load(f"codes/{code}.npz")["codes"]
     codes = dict()
     i = 0
-    for row in KEYS:
-        for key in row:
-            if code == "onoff":
-                codes[key] = [1, 0]
-            else:
-                codes[key] = tmp[:, i].tolist()
-            i += 1
+    for key in KEYS:
+        
+        if code == "onoff":
+            codes[key] = [1, 0]
+        else:
+            codes[key] = tmp[:, i].tolist()
+        i += 1
+
     if code == "onoff":
         codes["stt"] = [1, 0]
     else:
@@ -368,23 +366,29 @@ def test(n_trials, code="onoff"):# modul gold codes
     
     print("Starting.")
 
+
     # Start experiment
     keyboard.log(marker=["visual", "cmd", "start_experiment", ""])
     keyboard.set_field_text("text", "Starting...")
     keyboard.run(highlights, 5.0)
     keyboard.set_field_text("text", "")
     
-    # keyboard.set_plus_sign_position((0, 0.5 * ppd))
-    
+  
+    trial_vec = np.random.permutation(np.arange(n_trials) % 2).astype("uint8")
     
     # Loop trials
     text = ""
     for i_trial in range(n_trials):
         print("i trial is",i_trial)
         # Set target
-        # target = np.random.randint(0, 32)
-        target = np.random.randint(0,2)
-        target_key = KEYS[int(target) // len(KEYS[0])][int(target) % len(KEYS[0])]
+       
+        target = int(trial_vec[i_trial]) # we need
+        
+
+        # target_key = KEYS[int(target) // len(KEYS[0])][int(target) % len(KEYS[0])]
+        
+        target_key = KEYS[target]
+
         print(f"{1 + i_trial:03d}/{n_trials}\t{target_key}\t{target}")
         
         keyboard.log(["visual", "param", "target", json.dumps(target)])
@@ -406,20 +410,20 @@ def test(n_trials, code="onoff"):# modul gold codes
         
         
        
-        text += target_key
-        keyboard.set_field_text("text", text)
+        # text += target_key
+        # keyboard.set_field_text("text", text)
 
-        # Feedback
-        highlights[target_key] = [-1]
-        keyboard.run(highlights, FEEDBACK_TIME, 
-            start_marker=["visual", "cmd", "start_feedback", json.dumps(1+i_trial)], 
-            stop_marker=["visual", "cmd", "stop_feedback", json.dumps(1+i_trial)])
-        highlights[target_key] = [0]
+        # # Feedback
+        # highlights[target_key] = [-1]
+        # keyboard.run(highlights, FEEDBACK_TIME, 
+        #     start_marker=["visual", "cmd", "start_feedback", json.dumps(1+i_trial)], 
+        #     stop_marker=["visual", "cmd", "stop_feedback", json.dumps(1+i_trial)])
+        # highlights[target_key] = [0]
 
-        # Inter-trial time
-        keyboard.run(highlights, ITI_TIME, 
-            start_marker=["visual", "cmd", "start_intertrial", json.dumps(1+i_trial)], 
-            stop_marker=["visual", "cmd", "stop_intertrial", json.dumps(1+i_trial)])
+        # # Inter-trial time
+        # keyboard.run(highlights, ITI_TIME, 
+        #     start_marker=["visual", "cmd", "start_intertrial", json.dumps(1+i_trial)], 
+        #     stop_marker=["visual", "cmd", "stop_intertrial", json.dumps(1+i_trial)])
 
     # Stop experiment
     keyboard.log(marker=["visual", "cmd", "stop_experiment", ""])
@@ -434,8 +438,8 @@ def test(n_trials, code="onoff"):# modul gold codes
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="Test keyboard.py")
-    parser.add_argument("-n", "--ntrials", type=int, help="number of trials", default=5)
-    parser.add_argument("-c", "--code", type=str, help="code set to use", default="onoff")
+    parser.add_argument("-n", "--ntrials", type=int, help="number of trials", default=20)
+    parser.add_argument("-c", "--code", type=str, help="code set to use", default="mgold_61_6521")
     args = parser.parse_args()
-    args.ntrials = 1
-    test(n_trials=1, code=args.code)
+
+    test(n_trials=args.ntrials, code=args.code)
