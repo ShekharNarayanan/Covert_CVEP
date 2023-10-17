@@ -7,7 +7,7 @@ Python implementation of a keyboard for the noise-tagging project.
 """
 '''Notes:
 - Press Q to quit
-- Keyboard is replaced with just Y and N (classes)
+- Keyboard is replaced with just Y and N 
 - "+" is placed between the two classes
 '''
 
