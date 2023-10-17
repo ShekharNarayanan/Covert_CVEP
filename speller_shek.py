@@ -6,7 +6,10 @@
 Python implementation of a keyboard for the noise-tagging project.
 """
 '''Notes:
-Press Q to quit// color later'''
+- Press Q to quit
+- Keyboard is replaced with just Y and N (classes)
+- "+" is placed between the two classes
+'''
 
 import os, json
 import numpy as np
@@ -15,8 +18,6 @@ from psychopy import visual, event, monitors, misc, prefs
 from psychopy import core
 import math
 
-
-# add text stim "+" in the center 
 
 class Keyboard(object):
     """
