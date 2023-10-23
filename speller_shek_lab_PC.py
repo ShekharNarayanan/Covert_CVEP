@@ -112,6 +112,28 @@ class Keyboard(object):
         """
         assert name not in self.keys, "Trying to add a box with a name that already extists!"
         self.keys[name] = []
+
+        def add_highlighter(self,name,color,lineWidth):
+        """
+        Add a rectangular highlighter window around the cued option
+
+        Args:
+            name (str):
+                The name of the key
+            color (array):
+                color of the window (set to red during trial otherwise same as background)
+            
+        """
+            assert name in self.keys, "Key does not exist!"
+            key = self.keys[name][0]  # Get the first image associated with the key
+        
+            highlighter = visual.Rect(win=self.window,
+                                      width=key.size[0]+0.05, height=key.size[1]+0.05, 
+                                      units="pix", lineWidth = lineWidth,lineColor=color, pos=key.pos, 
+                                      fillColor=None, opacity= 1)
+            # self.highlighters[name] = highlighter
+            
+            highlighter.setAutoDraw(True)
     
         
         for i in range(len(images)):
@@ -406,9 +428,11 @@ def test(n_trials, code="onoff"):# modul gold codes
         highlights[target_key] = [0]
 
         # Trial
+        keyboard.add_highlighter(target_key,color="yellow",lineWidth=5)# Create a highlighter window; use red or yellow to contrast most with grey background
         keyboard.run(codes, TRIAL_TIME, 
             start_marker=["visual", "cmd", "start_trial", json.dumps(1+i_trial)], 
             stop_marker=["visual", "cmd", "stop_trial", json.dumps(1+i_trial)])
+        keyboard.add_highlighter(target_key, color = [0,0,0],lineWidth=6) # Create another window that masks the previous window at the end of the trial
         
         
        
