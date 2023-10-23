@@ -5,7 +5,11 @@
 
 Read LSL data
 
-(modified version for 2 class cvep pilot)
+Modifications @ SN
+1. Hardcoded the "conditions" vector for the codes used in the pilot
+2. Added a notch filter
+3. Option to view and remove bad epochs from data
+4. Option to remove bad channels 
 """
 
 
