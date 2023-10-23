@@ -18,7 +18,7 @@ from psychopy import visual, event, monitors, misc, prefs
 from psychopy import core
 import math
 
-
+os.chdir(r"C:/Users/s1081686/Desktop/RA_Project/Scripts/pynt_codes/SN_experiment")
 class Keyboard(object):
     """
     A keyboard with keys and text fields.
@@ -120,6 +120,32 @@ class Keyboard(object):
 
         # Set autoDraw to True for first default key to keep app visible
         self.keys[name][0].setAutoDraw(True)
+        
+    def add_highlighter(self,name,color,lineWidth):
+        """
+        Add a rectangular highlighter window around the cued option
+
+        Args:
+            name (str):
+                The name of the key
+            color (array):
+                color of the window (set to red during trial otherwise same as background)
+            
+        """
+        assert name in self.keys, "Key does not exist!"
+        key = self.keys[name][0]  # Get the first image associated with the key
+    
+        highlighter = visual.Rect(win=self.window,
+                                  width=key.size[0]+0.05, height=key.size[1]+0.05, 
+                                  units="pix", lineWidth = lineWidth,lineColor=color, pos=key.pos, 
+                                  fillColor=None, opacity= 1)
+        # self.highlighters[name] = highlighter
+        
+        highlighter.setAutoDraw(True)
+        
+            
+        
+        
 
     def add_text_field(self, name, text, size, pos, field_color=(0, 0, 0), text_color=(-1, -1, -1)):
         """
@@ -191,6 +217,7 @@ class Keyboard(object):
         # Set autoDraw to False for full control
         for key in self.keys.values():
             key[0].setAutoDraw(False)
+            
 
         # Send start marker
         self.log(start_marker, on_flip=True)
@@ -206,7 +233,10 @@ class Keyboard(object):
             # Draw keys with color depending on code state
             for name, code in codes.items():
                 self.keys[name][code[i % len(code)]].draw()
+                # self.add_highlighter(name)
             self.window.flip()
+            
+            
 
         # Send stop markers
         self.log(stop_marker)
@@ -244,9 +274,9 @@ def test(n_trials, code="onoff"):# modul gold codes
     """
 
     STREAM = False # True  when actually testing
-    SCREEN = 0 # change for projection 
+    SCREEN = 2 # change for projection 
     SCREEN_SIZE = (1536, 864)# # Mac: (1792, 1120), LabPC: (1920, 1080), HP: 1536, 864
-    SCREEN_WIDTH = 35.0  # Mac: (34,5), LabPC: 53.0, 35.94
+    SCREEN_WIDTH = 35.94  # Mac: (34,5), LabPC: 53.0, 35.94
     SCREEN_DISTANCE = 60.0
     SCREEN_COLOR = (0, 0, 0)
     FR = 60  # screen frame rate
@@ -291,17 +321,11 @@ def test(n_trials, code="onoff"):# modul gold codes
     keyboard.add_text_field("text", "", (SCREEN_SIZE[0] - STT_WIDTH * ppd, TEXT_FIELD_HEIGHT * ppd), (x_pos, y_pos), (0, 0, 0), (-1, -1, -1))
     
     keyboard.add_text_field(None, "+",((STT_WIDTH * ppd, STT_HEIGHT * ppd)),(0,0),(0, 0, 0), (-1, -1, -1) )
-    
-    
-    
-#     print("the cross is placed at",SCREEN_WIDTH/2)
-    
-  
-    
+
     
     for key_i in range(len(KEYS)):
         
-        key_2_add = KEYS[key_i]
+        # key_2_add = KEYS[key_i]
         y_pos = -(0.5)* ppd - TEXT_FIELD_HEIGHT * ppd
         
         if key_i==1:
@@ -315,10 +339,7 @@ def test(n_trials, code="onoff"):# modul gold codes
         images = [f"images/{KEYS[key_i]}_{color}.png" for color in KEY_COLORS]
         keyboard.add_key(KEYS[key_i], (KEY_WIDTH * ppd, KEY_HEIGHT * ppd), (x_pos, y_pos), images)
         
-    
-    
-        
-        
+ 
 
     # Load sequences
     if code != "onoff":
@@ -398,9 +419,13 @@ def test(n_trials, code="onoff"):# modul gold codes
         highlights[target_key] = [0]
 
         # Trial
+        keyboard.add_highlighter(target_key,color="yellow",lineWidth=5)#red is [1,-1,-1]
         keyboard.run(codes, TRIAL_TIME, 
             start_marker=["visual", "cmd", "start_trial", json.dumps(1+i_trial)], 
             stop_marker=["visual", "cmd", "stop_trial", json.dumps(1+i_trial)])
+        keyboard.add_highlighter(target_key,color = [0,0,0],lineWidth=6)
+        
+        
         
         
        
