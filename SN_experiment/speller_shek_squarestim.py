@@ -129,7 +129,9 @@ class Keyboard(object):
             name (str):
                 The name of the key
             color (array):
-                color of the window (set to red during trial otherwise same as background)
+                Color of the window (set to red during trial otherwise same as background)
+            lineWidth (int):
+                Specify the thickness of the border
             
         """
         assert name in self.keys, "Key does not exist!"
@@ -139,7 +141,7 @@ class Keyboard(object):
                                   width=key.size[0]+0.05, height=key.size[1]+0.05, 
                                   units="pix", lineWidth = lineWidth,lineColor=color, pos=key.pos, 
                                   fillColor=None, opacity= 1)
-        # self.highlighters[name] = highlighter
+
         
         highlighter.setAutoDraw(True)
         
@@ -319,23 +321,21 @@ def test(n_trials, code="onoff"):# modul gold codes
     x_pos = STT_WIDTH * ppd
     y_pos = SCREEN_SIZE[1] / 2 - TEXT_FIELD_HEIGHT * ppd / 2
     keyboard.add_text_field("text", "", (SCREEN_SIZE[0] - STT_WIDTH * ppd, TEXT_FIELD_HEIGHT * ppd), (x_pos, y_pos), (0, 0, 0), (-1, -1, -1))
-    
+
+    # Add '+' between the two classes
     keyboard.add_text_field(None, "+",((STT_WIDTH * ppd, STT_HEIGHT * ppd)),(0,0),(0, 0, 0), (-1, -1, -1) )
 
     
     for key_i in range(len(KEYS)):
-        
-        # key_2_add = KEYS[key_i]
+
         y_pos = -(0.5)* ppd - TEXT_FIELD_HEIGHT * ppd
         
         if key_i==1:
             x_pos = (-1)*(KEY_WIDTH + KEY_SPACE) * ppd 
-            # print("x pos1 is", x_pos) 
-            # print("x pos1 difference from cross is",abs(x_pos)-SCREEN_WIDTH/2)
+
         else:
             x_pos = (1)*(KEY_WIDTH + KEY_SPACE) * ppd 
-            # print("xpos 2 is",x_pos)
-            # print("x pos2 difference from cross is",abs(x_pos)-SCREEN_WIDTH/2)
+
         images = [f"images/{KEYS[key_i]}_{color}.png" for color in KEY_COLORS]
         keyboard.add_key(KEYS[key_i], (KEY_WIDTH * ppd, KEY_HEIGHT * ppd), (x_pos, y_pos), images)
         
@@ -423,12 +423,8 @@ def test(n_trials, code="onoff"):# modul gold codes
         keyboard.run(codes, TRIAL_TIME, 
             start_marker=["visual", "cmd", "start_trial", json.dumps(1+i_trial)], 
             stop_marker=["visual", "cmd", "stop_trial", json.dumps(1+i_trial)])
-        keyboard.add_highlighter(target_key,color = [0,0,0],lineWidth=6)
-        
-        
-        
-        
-       
+        keyboard.add_highlighter(target_key,color = [0,0,0],lineWidth=6)# linewidth is increased to mask the highlighter at the end of a trial
+
         # text += target_key
         # keyboard.set_field_text("text", text)
 
