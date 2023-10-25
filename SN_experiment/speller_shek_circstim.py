@@ -10,6 +10,7 @@ Python implementation of a keyboard for the noise-tagging project.
 - Added: "+" is placed in between the two classes
 - Added: Function to crop the square images into circles before they get added 
 - Added: Function to highlight the cued key during trial
+- Changed: The add_key function was changed to add the circular images for the stimuli and a square image for the stimulus timing tracker (stt)
 '''
 
 import os, json
