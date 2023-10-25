@@ -5,10 +5,10 @@
 
 Python implementation of a keyboard for the noise-tagging project.
 """
-'''Notes:
-- Press Q to quit
-- Keyboard is replaced with just the Y and N keys
+'''Modifications @ SN:
+- The matrix keyboard is reduced to two classes: Y and N
 - "+" is placed in between the two classes
+- Added: Function to highlight the cued key during trial
 '''
 
 import os, json
