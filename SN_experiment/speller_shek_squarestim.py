@@ -6,8 +6,8 @@
 Python implementation of a keyboard for the noise-tagging project.
 """
 '''Modifications @ SN:
-- The matrix keyboard is reduced to two classes: Y and N
-- "+" is placed in between the two classes
+- Removed: The matrix keyboard is reduced to two classes: Y and N
+- Added: "+" is placed in between the two classes
 - Added: Function to highlight the cued key during trial
 '''
 
