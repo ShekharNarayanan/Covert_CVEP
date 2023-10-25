@@ -5,12 +5,13 @@
 
 Python implementation of a keyboard for the noise-tagging project.
 """
-'''Notes:
-- Press Q to quit
-- Keyboard is replaced with just the Y and N keys
-- "+" is placed in between the two classes
+'''Modifications @ SN:
+- Removed: The matrix keyboard is reduced to two classes: Y and N
+- Added: "+" is placed in between the two classes
+- Added: Function to crop the square images into circles before they get added 
+- Added: Function to highlight the cued key during trial
 '''
-'Try using a range of colors for the highlighter; pick 3/4 max contrasting colors and randomly pick them during a trial'
+
 import os, json
 import numpy as np
 import psychopy
