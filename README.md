@@ -16,4 +16,13 @@ Contents:
 1. Jupyter Notebook walkthrough for decoding the preprocessed neural activity into either of the two classes used.
 
 Libraries used:
-*Numpy*-*Psychopy*-*math*-*pyntBCI*-*PIL*-*MNE*-*scipy*-*h5py*-*scikit-learn*-*matplotlib*
+- *Numpy*
+- *Psychopy*
+- *math*
+- *pyntBCI*
+- *PIL*
+- *MNE*
+- *scipy*
+- *h5py*
+- *scikit-learn*
+- *matplotlib*
