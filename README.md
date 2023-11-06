@@ -9,11 +9,12 @@ Contents:
 1. The codes or sequences used for flashing stimuli during the experiment
 2. Images that are flashed
 3. Python code for creating the stimulus and the paradigm
-4. Python code for extracting relevant vectors from raw EEG data and preprocessing.
+
 
 # Analysis
 Contents:
 1. Jupyter Notebook walkthrough for decoding the preprocessed neural activity into either of the two classes used.
+2. Python code for preprocessing and extracting relevant vectors from raw EEG data.
 
 Libraries used:
 - *Numpy*
