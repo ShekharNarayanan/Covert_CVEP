@@ -8,7 +8,7 @@ It aims to do so by eliminiating the need of eyetracking, since many who suffer 
 Contents:
 1. The codes or sequences used for flashing stimuli during the experiment
 2. Images that are flashed
-3. Python code for creating the stimulus and the paradigm
+3. Python code for creating the experimental paradigm
 
 
 # Analysis
