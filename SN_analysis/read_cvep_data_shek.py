@@ -111,7 +111,7 @@ for subject in subjects:
             # print("bad channels", raw.info["bads"]) # checking for manually annotated bad channels during the recording
             
             
-            'Powerline noise check after notch (Optional, recommended when running the script subjects from the same day)'
+            'Powerline noise check after notch (Optional, recommended when running the script subjects from the same recording day)'
             # fig = raw.compute_psd(tmax=np.inf, fmax=250).plot(average=True, picks="eeg", exclude="bads")
             # # add some arrows at 60 Hz and its harmonics:
             # for ax in fig.axes[1:]:
