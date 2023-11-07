@@ -7,9 +7,10 @@ Read LSL data
 
 Modifications @ SN
 1. Hardcoded the "conditions" vector for the codes used in the pilot
-2. Added a notch filter
-3. Option to view and remove bad epochs from data
-4. Option to remove bad channels 
+2. Added: A notch filter
+3. Added: Option to view and remove bad epochs from data
+4. Added: Option to remove bad channels 
+5. Added: ICA for preprocessing and artefact removal
 """
 
 
@@ -132,7 +133,51 @@ for subject in subjects:
             # plt.show()                          
 
             # Read events
-            events = mne.find_events(raw, stim_channel="Trig1")            
+            events = mne.find_events(raw, stim_channel="Trig1")   
+
+            'Setting up and fitting ICA'
+            
+            picks_eeg = mne.pick_types(raw.info, meg = False, eeg = True, eog = False, stim = False, exclude = 'bads')   # getting EEG data         
+            ica_obj = mne.preprocessing.ICA(n_components = 32,   
+                                            method =  'infomax',                                          
+                                            max_iter = 'auto',
+                                            random_state = 1 
+                                            fit_params = dict(extended = True)
+                                            )
+            
+            # Setting montage for biosemi (needed for topoplots)
+            
+            # Read cap file
+            path_capfile = r"C:\Users\s1081686\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\pyntbci\capfiles" 
+            capfile = os.path.join(path_capfile, "biosemi32.loc")
+            with open(capfile, "r") as fid:
+                channels = []
+                for line in fid.readlines():
+                    channels.append(line.split("\t")[-1].strip())
+            
+            chan_names_old = raw.info.ch_names[1:33]
+
+             # replacing/mapping channel names from raw to actual names
+            mapping = {}            
+            for key, channel in zip(chan_names_old, channels):
+                mapping[key] = channel
+                            
+            mne.rename_channels(raw.info,mapping = mapping)
+            montage = mne.channels.read_custom_montage(fname = capfile)
+            print(montage)
+            raw.set_montage(montage)
+
+            # fitting ICA
+            ica_obj.fit(raw, picks = picks_eeg)    # fitting the ica
+            ica =  ica_obj.get_sources(raw).get_data()
+            print("shape of ica matrix",ica.shape)
+            
+            # plotting ICA results
+            # ica_obj.plot_sources(raw)
+            # ica_obj.plot_components(picks = None, show = True, inst = raw)
+            
+            # Applying ICA results to raw data
+            ica_obj.apply(raw) 
 
             # Slicing
             # N.B. Add baseline to capture filtering artefacts of 
