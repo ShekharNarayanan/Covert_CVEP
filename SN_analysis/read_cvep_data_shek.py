@@ -177,7 +177,7 @@ for subject in subjects:
             
             # plotting ICA results
             ica_obj.plot_sources(raw)
-            ica_obj.plot_components(picks = None, show = True, inst = raw)# what does this actually show????0
+            ica_obj.plot_components(picks = None, show = True, inst = raw)# plotting individual components
             
             
             
@@ -185,7 +185,7 @@ for subject in subjects:
             exclude_vec_str = easygui.enterbox("Enter the component(s) you would like to exclude please (1 2 3 ..) ")
             vector_list = [int(x) for x in exclude_vec_str.split()]
             ica_obj.exclude = vector_list
-            ica_obj.apply(raw) # go back to EEG space????         
+            ica_obj.apply(raw) # go back to EEG space/ apply the ICA changes        
 
             # Slicing
             # N.B. Add baseline to capture filtering artefacts of 
