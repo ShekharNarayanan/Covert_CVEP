@@ -4,13 +4,13 @@
 @author: Jordy Thielen (jordy.thielen@donders.ru.nl)
 
 Read LSL data
-
 Modifications @ SN
 1. Hardcoded the "conditions" vector for the codes used in the pilot
 2. Added: A notch filter
 3. Added: Option to view and remove bad epochs from data
 4. Added: Option to remove bad channels 
 5. Added: ICA for preprocessing and artefact removal
+
 """
 
 
@@ -25,18 +25,19 @@ from mne.io import Raw
 from mne.preprocessing import ICA
 from matplotlib  import pyplot as plt
 from copy import deepcopy
+import easygui
 
 
 
-path = r"C:\Users\s1081686\Desktop\RA_Project\Scripts\pynt_codes\analysis\pilot_shek_dat"
-repo = r"C:\Users\s1081686\Desktop\RA_Project\Scripts\pynt_codes\experiment\codes"
+path = r"C:\Users\s1081686\Desktop\RA_Project\Scripts\pynt_codes\SN_pilot_data"
+repo = r"C:\Users\s1081686\Desktop\RA_Project\Scripts\pynt_codes\SN_experiment\codes"
 
 subjects = ["pilot"]
 ses = "ses-S001"
 
 skip_done = True
 
-## IMPORTANT PARAMETERS TO CHANGE
+## IMPORTANT PARAMETERS 
 fs = 240  # target EEG sampling frequency (multiple of stimulus presentation rate)
 fr = 60  # monitor refresh rate
 pr = 60  # stimulus presentation rate
@@ -46,9 +47,8 @@ pr = 60  # stimulus presentation rate
 cvep_l_freq = 2
 cvep_h_freq = 35# originally 35 
 
-# how to change this for mgold_61?
-cvep_trial_time_1 = 63 / pr * 4  # 126 / pr * 2 (m-sequence, Gold)
-cvep_trial_time_2 = 64 / pr * 4  # 128 / pr * 2 (de Bruijn, Golay)
+# trial_time 
+trial_time = 10.5 # in seconds
 
 # for shek_pilot
 key_words = ['covert','overt']
@@ -68,6 +68,9 @@ for subject in subjects:
             fn = os.path.join(path, "raw", f"sub-{subject}", ses, "eeg", 
                 f"sub-{subject}_{ses}_task-{key_words[i_word]}_run-{1 + i_run:03d}_eeg.xdf")
             
+            print("path is",fn)
+            
+            
             streams = pyxdf.resolve_streams(fn)
             names = [stream["name"] for stream in streams]
 
@@ -85,7 +88,6 @@ for subject in subjects:
                                
             # adding a notch filter
             notch = 50
-            print("no new errors ")
             raw.notch_filter(freqs=np.arange(notch,raw.info["sfreq"]/2,notch))
             
             
@@ -94,15 +96,15 @@ for subject in subjects:
             annotation ends up removing the whole trial even if only a small duration of it is bad'''
             
             #removing signal space projectors from raw file
-            ssp_projectors = raw.info["projs"]
-            raw.del_proj()           
+            # ssp_projectors = raw.info["projs"]
+            # raw.del_proj()           
                                     
-            print("raw data visualization, check for eye movement artefacts and huge movement artefacts")
-            eeg_chans = mne.pick_types(raw.info,eeg=True)
-            fig = raw.plot(duration=60,order = eeg_chans, n_channels = len(eeg_chans),remove_dc = False)# duration is the x second block with which you move in the plot
-            plt.title('Press A to begin',loc="center")
-            plt.show()
-            fig.fake_keypress("a")
+            # print("raw data visualization, check for eye movement artefacts and huge movement artefacts")
+            # eeg_chans = mne.pick_types(raw.info,eeg=True)
+            # fig = raw.plot(duration=60,order = eeg_chans, n_channels = len(eeg_chans),remove_dc = False)# duration is the x second block with which you move in the plot
+            # plt.title('Press A to begin',loc="center")
+            # plt.show()
+            # fig.fake_keypress("a")
             
             'Dropping bad channels (Optional)'
             # bad_chans = ['A24'] # found from the raw plots; A7 also looks strange for covert
@@ -133,16 +135,16 @@ for subject in subjects:
             # plt.show()                          
 
             # Read events
-            events = mne.find_events(raw, stim_channel="Trig1")   
-
+            events = mne.find_events(raw, stim_channel="Trig1")    
+            
             'Setting up and fitting ICA'
             
-            picks_eeg = mne.pick_types(raw.info, meg = False, eeg = True, eog = False, stim = False, exclude = 'bads')   # getting EEG data         
+            picks_eeg = mne.pick_types(raw.info, meg = False, eeg = True, eog = False, stim = False, exclude = 'bads')            
             ica_obj = mne.preprocessing.ICA(n_components = 32,   
-                                            method =  'infomax',                                          
+                                            method =  'fastica',                                          
                                             max_iter = 'auto',
-                                            random_state = 1 
-                                            fit_params = dict(extended = True)
+                                            random_state = 97 
+                                            # fit_params = dict(extended = True)
                                             )
             
             # Setting montage for biosemi (needed for topoplots)
@@ -156,28 +158,34 @@ for subject in subjects:
                     channels.append(line.split("\t")[-1].strip())
             
             chan_names_old = raw.info.ch_names[1:33]
-
-             # replacing/mapping channel names from raw to actual names
-            mapping = {}            
+            
+            mapping = {}
+            
             for key, channel in zip(chan_names_old, channels):
                 mapping[key] = channel
-                            
+            
+                
             mne.rename_channels(raw.info,mapping = mapping)
+            # montage = mne.channels.make_standard_montage(kind = 'biosemi32')
             montage = mne.channels.read_custom_montage(fname = capfile)
             print(montage)
             raw.set_montage(montage)
-
-            # fitting ICA
+            
             ica_obj.fit(raw, picks = picks_eeg)    # fitting the ica
             ica =  ica_obj.get_sources(raw).get_data()
             print("shape of ica matrix",ica.shape)
             
             # plotting ICA results
-            # ica_obj.plot_sources(raw)
-            # ica_obj.plot_components(picks = None, show = True, inst = raw)
+            ica_obj.plot_sources(raw)
+            ica_obj.plot_components(picks = None, show = True, inst = raw)# what does this actually show????0
             
-            # Applying ICA results to raw data
-            ica_obj.apply(raw) 
+            
+            
+            # Applying ICA results to raw data and removing noisy components
+            exclude_vec_str = easygui.enterbox("Enter the component(s) you would like to exclude please (1 2 3 ..) ")
+            vector_list = [int(x) for x in exclude_vec_str.split()]
+            ica_obj.exclude = vector_list
+            ica_obj.apply(raw) # go back to EEG space????         
 
             # Slicing
             # N.B. Add baseline to capture filtering artefacts of 
@@ -185,9 +193,9 @@ for subject in subjects:
             # N.B. Use largest trialtime (samples are cut away later)
             baseline = 0.5
             epo = mne.Epochs(raw, events=events, tmin=-baseline, 
-                tmax=cvep_trial_time_2, baseline= None, picks="eeg", 
-                preload=True, reject_by_annotation= True)
-
+                tmax=trial_time, baseline= None, picks="eeg", 
+                preload=True, reject_by_annotation= True)           
+            
             # Resampling
             # N.B. Downsampling is done after slicing to maintain accurate 
             # stimulus timing
@@ -205,10 +213,12 @@ for subject in subjects:
             names = [stream["info"]["name"][0] for stream in streams]
 
             marker_stream = streams[names.index("KeyboardMarkerStream")]
-                        
+            
+                                
             labels.extend([int(marker[3]) 
                 for marker in marker_stream["time_series"] 
                 if marker[2] == "target"])
+            
             
             # Removing trials with bad data from labels                      
             labels = [label for i, label in enumerate(labels) if i not in dropped_eps]            
@@ -232,7 +242,8 @@ for subject in subjects:
 
             # Set correct trial length
             if "mseq" in condition or "gold" in condition:
-                _X = _X[:, :, :int(cvep_trial_time_1 * fs)]
+                _X = _X[:, :, :int(trial_time * fs)]
+                
                 
             # Load codes
             fn = os.path.join(repo, f"{condition}.npz").replace('\\','/')
@@ -247,7 +258,7 @@ for subject in subjects:
             print("\tV:", V.shape)
 
             # Save data
-            cvep = f"{subject}_cvep_{key_words[i_word]}_{condition}.npz"
+            cvep = f"{subject}_cvep_{key_words[i_word]}_{condition}_40T_ICA.npz"
             fn = os.path.join(path, "derivatives", subject, cvep)
             np.savez(fn, X=_X, y=_y, V=V, fs=fs)
             
