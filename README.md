@@ -8,7 +8,7 @@ It aims to do so by eliminating the need for eye-tracking, since many who suffer
 Contents:
 1. The codes or sequences used for flashing stimuli during the experiment
 2. Images that are flashed
-3. speller.py (various):Python code for creating the experimental paradigm
+3. speller.py (various):Python code for creating the experimental paradigms (square stimuli, circular stimuli and their extended sequential format versions)
 
 
 # Analysis
