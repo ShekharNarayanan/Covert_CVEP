@@ -12,8 +12,9 @@ Python implementation of a keyboard for the noise-tagging project.
 - Added: Option to change the visual angle between the two classes.
 - Added: Option for changing the placement of stimuli relative to the fixation cross.
 - Added: Option to use the p300 paradigm along with the current setup.
+
 '''
-'Try using a range of colors for the highlighter; pick 3/4 max contrasting colors and randomly pick them during a trial'
+
 import os, json
 import numpy as np
 import psychopy
@@ -22,6 +23,8 @@ from psychopy import core
 import math
 from PIL import Image, ImageDraw
 from matplotlib import pyplot as plt
+import random
+import time
 
 os.chdir(r"C:/Users/s1081686/Desktop/RA_Project/Scripts/pynt_codes/SN_experiment")
 class Keyboard(object):
@@ -454,7 +457,11 @@ def test(n_trials, vis_angle,key_ypos, p300_arg, code="onoff"):# modul gold code
     for block in range(len(chosen_letters)):
         chosen_letter = chosen_letters[block]
         
-        print(f"starting block for {chosen_letter}")        
+        print(f"starting block for {chosen_letter}")   
+        # Choosing trials for the  p300 cue (1/3rd of all trials- randomly chosen)
+        all_trials = np.arange(n_trials) # array containing all trial indices
+        num_elements = int(np.round(len(all_trials)/3))  # collecting len/3 number of trials
+        p300_trials = np.random.choice(all_trials,size = num_elements)       
 
         # Loop trials
         text = ""
@@ -486,18 +493,14 @@ def test(n_trials, vis_angle,key_ypos, p300_arg, code="onoff"):# modul gold code
                 stop_marker=["visual", "cmd", "stop_cue", json.dumps(1+i_trial)])
             highlights[target_key] = [0]
 
-            # Trial
-            # Adding a p300 cue
-            rand_int = np.random.randint(0,n_trials)
-            
-            import time
+            # Trial              
             count = 0
             if p300_arg == 'True':
                 
-                if i_trial== rand_int:
+                if i_trial in p300_trials:
                     keyboard.add_highlighter(target_key,color="red",lineWidth=5, size_str = 'big')#red is [1,-1,-1]; add highlighter
                     keyboard.window.flip() 
-                    time.sleep(0.5) # freezing the output for 300ms             
+                    time.sleep(0.5) # freezing the output for 500ms             
                     print('trial for highlighter was', i_trial)
                     count +=1     
                     keyboard.add_highlighter(target_key,color = [0,0,0],lineWidth=6, size_str='big')
@@ -545,7 +548,7 @@ if __name__ == "__main__":
     parser.add_argument("-c", "--code", type=str, help="code set to use", default="mgold_61_6521")
     parser.add_argument("-vs_ang","--vis_angle", type = float, default = 7.5)
     parser.add_argument('-kyps',"--key_ypos",type= str, default = 'below')
-    parser.add_argument("--p300_arg",type= str, default = 'False')
+    parser.add_argument("--p300_arg",type= str, default = 'True')
     
     args = parser.parse_args()
 

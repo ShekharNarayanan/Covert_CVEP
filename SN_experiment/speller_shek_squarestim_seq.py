@@ -22,6 +22,8 @@ import psychopy
 from psychopy import visual, event, monitors, misc, prefs
 from psychopy import core
 import math
+import time
+import random
 
 os.chdir(r"C:/Users/s1081686/Desktop/RA_Project/Scripts/pynt_codes/SN_experiment")
 class Keyboard(object):
@@ -152,7 +154,7 @@ class Keyboard(object):
         else:
             
             highlighter = visual.Rect(win=self.window,
-                                  width=4*key.size[0]+0.05, height=4*key.size[1]+0.05, 
+                                  width=2*key.size[0]+0.05, height=2*key.size[1]+0.05, 
                                   units="pix", lineWidth = lineWidth,lineColor=color, pos=key.pos, 
                                   fillColor=None, opacity= 1)
             
@@ -439,7 +441,12 @@ def test(n_trials, vis_angle,key_ypos, p300_arg, code="onoff"):# modulated gold 
     for block in range(len(chosen_letters)):
         chosen_letter = chosen_letters[block]
         
-        print(f"starting block for {chosen_letter}")        
+        print(f"starting block for {chosen_letter}") 
+        
+        # Choosing trials for the  p300 cue (1/3rd of all trials- randomly chosen)
+        all_trials = np.arange(n_trials) # array containing all trial indices
+        num_elements = int(np.round(len(all_trials)/3))  # collecting len/3 number of trials
+        p300_trials = np.random.choice(all_trials,size = num_elements)      
 
         # Loop trials
         text = ""
@@ -472,13 +479,13 @@ def test(n_trials, vis_angle,key_ypos, p300_arg, code="onoff"):# modulated gold 
             highlights[target_key] = [0]
 
             # Trial
-            # Adding a p300 cue
-            rand_int = np.random.randint(0,n_trials)
+            
             count = 0
             
             if p300_arg == 'True':
-                import time
-                if i_trial== rand_int:
+                print('p300 trials',p300_trials)
+                if i_trial in p300_trials:
+                
                     keyboard.add_highlighter(target_key,color="red",lineWidth=5, size_str = 'big')#red is [1,-1,-1]; add highlighter
                     keyboard.window.flip() 
                     time.sleep(0.5) # freezing the output for 300ms             
@@ -526,7 +533,7 @@ if __name__ == "__main__":
     parser.add_argument("-c", "--code", type=str, help="code set to use", default="mgold_61_6521")
     parser.add_argument("-vs_ang","--vis_angle", type = float, default = 7.5)
     parser.add_argument('-kyps',"--key_ypos",type= str, default = 'below')
-    parser.add_argument("--p300_arg",type= str, default = 'False')
+    parser.add_argument("--p300_arg",type= str, default = 'True')
     
     args = parser.parse_args()
 
