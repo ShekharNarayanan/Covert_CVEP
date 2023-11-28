@@ -118,7 +118,7 @@ class Keyboard(object):
                
         return img
         
-    def add_highlighter(self,name,color,lineWidth):
+    def add_highlighter(self,name,color,lineWidth, size_str='same'):
         """
         Add a circular highlighter window around the cued option during trials
 
@@ -129,13 +129,22 @@ class Keyboard(object):
                 color of the window (set to a contrasting color of choice during trials but otherwise set to grey)
             lineWidth (int):
                 Width of the border of the highlighter
+            size_str (str):
+                Area of the highlighter (default is same as the circular key area)
             
         """
         assert name in self.keys, "Key does not exist!"
         key = self.keys[name][0]  # Get the first image associated with the key
+        
+        if size_str == 'same':
+            highlighter = visual.Circle(win=self.window,radius=key.size[0]/2+3,edges=256,units='pix', lineWidth=lineWidth,fillColor=None ,lineColor=color, pos=key.pos,opacity=1,autoDraw=True)
+        else:
+            highlighter = visual.Circle(win=self.window,radius=1.25*key.size[0]/2+3,edges=256,units='pix', lineWidth=lineWidth,fillColor=None ,lineColor=color, pos=key.pos,opacity=1,autoDraw=True)
+            
+            
     
 
-        highlighter = visual.Circle(win=self.window,radius=key.size[0]/2+3,edges=256,units='pix', lineWidth=lineWidth,fillColor=None ,lineColor=color, pos=key.pos,opacity=1,autoDraw=True)
+        
   
 
     def add_key(self, name, size, pos, images=["black.png", "white.png"]):
@@ -308,7 +317,7 @@ class Keyboard(object):
         self.window.close()
         core.quit()
 
-def test(n_trials, code="onoff"):# modul gold codes 
+def test(n_trials, vis_angle,key_ypos, p300_arg, code="onoff"):# modul gold codes 
     """
     Example experiment with initial setup and highlighting and presenting a few trials.
     """
@@ -329,7 +338,11 @@ def test(n_trials, code="onoff"):# modul gold codes
 
     KEY_WIDTH = 3.0
     KEY_HEIGHT = 3.0
-    KEY_SPACE = 12 # modify to units that have a relationship with screen width
+    
+    # key space and its corresponding visual angle in degrees(inner edge of left stimuli to inner edge of right stimuli)
+    # tan(theta/2) = (keyspace/2)/SCREEN_DISTANCE; therefore keyspace = 2*60* tan(theta/2); where theta is expected in radians    
+    KEY_SPACE = 120 * np.tan(np.radians(vis_angle/2))
+    
     KEY_COLORS = ["black", "white", "green", "blue"]
     KEYS = ["N", 
             "Y"]
@@ -338,7 +351,8 @@ def test(n_trials, code="onoff"):# modul gold codes
     CUE_TIME = 1  #0.8
     TRIAL_TIME = 10.5 # 10 for overt// dk for covert, 5 reps
     FEEDBACK_TIME = 0#0.5 -->  feedback is blue; cue is green
-    ITI_TIME = 0#0.5
+    ITI_TIME = 2#0.5
+    Inter_Run_Time = 2#120
 
     # Initialize keyboard
     keyboard = Keyboard(size=SCREEN_SIZE, width=SCREEN_WIDTH, distance=SCREEN_DISTANCE, screen=SCREEN, window_color=SCREEN_COLOR, stream=STREAM)
@@ -363,7 +377,11 @@ def test(n_trials, code="onoff"):# modul gold codes
     
     for key_i in range(len(KEYS)):
 
-        y_pos = -(0.5)* ppd - TEXT_FIELD_HEIGHT * ppd
+        # placing the keys either at the 'same' level as the fixation cross or 'below' it
+        if key_ypos== 'below': # default 
+            y_pos = -(0.5)* ppd - TEXT_FIELD_HEIGHT * ppd
+        else:
+            y_pos = 0
         
         if key_i==1:
             x_pos = (-1)*(KEY_WIDTH + KEY_SPACE) * ppd 
@@ -467,11 +485,28 @@ def test(n_trials, code="onoff"):# modul gold codes
             highlights[target_key] = [0]
 
             # Trial
+            # Adding a p300 cue
+            rand_int = np.random.randint(0,n_trials)
+            
+            import time
+            count = 0
+            if p300_arg == 'True':
+                
+                if i_trial== rand_int:
+                    keyboard.add_highlighter(target_key,color="red",lineWidth=5, size_str = 'big')#red is [1,-1,-1]; add highlighter
+                    keyboard.window.flip() 
+                    time.sleep(0.5) # freezing the output for 300ms             
+                    print('trial for highlighter was', i_trial)
+                    count +=1     
+                    keyboard.add_highlighter(target_key,color = [0,0,0],lineWidth=6, size_str='big')
+            
+            
             keyboard.add_highlighter(target_key,color="yellow",lineWidth=5)#red is [1,-1,-1]
             keyboard.run(codes, TRIAL_TIME, 
                 start_marker=["visual", "cmd", "start_trial", json.dumps(1+i_trial)], 
                 stop_marker=["visual", "cmd", "stop_trial", json.dumps(1+i_trial)],chosen_letter = chosen_letter)
             keyboard.add_highlighter(target_key,color = [0,0,0],lineWidth=6)
+            
               
         
        
@@ -485,11 +520,12 @@ def test(n_trials, code="onoff"):# modul gold codes
         #     stop_marker=["visual", "cmd", "stop_feedback", json.dumps(1+i_trial)])
         # highlights[target_key] = [0]
 
-        # # Inter-trial time
-        # keyboard.run(highlights, ITI_TIME, 
-        #     start_marker=["visual", "cmd", "start_intertrial", json.dumps(1+i_trial)], 
-        #     stop_marker=["visual", "cmd", "stop_intertrial", json.dumps(1+i_trial)])
-
+            # Inter-trial time
+            keyboard.run(highlights, ITI_TIME, 
+                start_marker=["visual", "cmd", "start_intertrial", json.dumps(1+i_trial)], 
+                stop_marker=["visual", "cmd", "stop_intertrial", json.dumps(1+i_trial)])
+        
+        time.sleep(Inter_Run_Time)
     # Stop experiment
     keyboard.log(marker=["visual", "cmd", "stop_experiment", ""])
     keyboard.set_field_text("text", "Stopping...")
@@ -503,9 +539,12 @@ def test(n_trials, code="onoff"):# modul gold codes
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="Test keyboard.py")
-    parser.add_argument("-n", "--ntrials", type=int, help="number of trials", default=20)
+    parser.add_argument("-n", "--ntrials", type=int, help="number of trials", default=2)
     parser.add_argument("-c", "--code", type=str, help="code set to use", default="mgold_61_6521")
+    parser.add_argument("-vs_ang","--vis_angle", type = float, default = 7.5)
+    parser.add_argument('-kyps',"--key_ypos",type= str, default = 'below')
+    parser.add_argument("--p300_arg",type= str, default = 'False')
+    
     args = parser.parse_args()
-    args.ntrials = 1
 
-    test(n_trials=args.ntrials, code=args.code)
+    test(n_trials=args.ntrials, vis_angle= args.vis_angle, key_ypos = args.key_ypos,p300_arg = args.p300_arg,code=args.code)

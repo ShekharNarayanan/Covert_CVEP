@@ -123,7 +123,7 @@ class Keyboard(object):
         # Set autoDraw to True for first default key to keep app visible
         self.keys[name][0].setAutoDraw(True)
         
-    def add_highlighter(self,name,color,lineWidth):
+    def add_highlighter(self,name,color,lineWidth,size_str = 'same'):
         """
         Add a rectangular highlighter window around the cued option
 
@@ -134,15 +134,28 @@ class Keyboard(object):
                 color of the window (set to red during trial otherwise same as background)
             lineWidth (int):
                 Specify the thickness of the border
+            size_str (str):
+                Area of the highlighter (default is same as the key area)
             
         """
         assert name in self.keys, "Key does not exist!"
         key = self.keys[name][0]  # Get the first image associated with the key
-    
-        highlighter = visual.Rect(win=self.window,
+        
+        if size_str == 'same':
+            highlighter = visual.Rect(win=self.window,
                                   width=key.size[0]+0.05, height=key.size[1]+0.05, 
                                   units="pix", lineWidth = lineWidth,lineColor=color, pos=key.pos, 
                                   fillColor=None, opacity= 1)
+        else:
+            
+            highlighter = visual.Rect(win=self.window,
+                                  width=4*key.size[0]+0.05, height=4*key.size[1]+0.05, 
+                                  units="pix", lineWidth = lineWidth,lineColor=color, pos=key.pos, 
+                                  fillColor=None, opacity= 1)
+            
+            
+    
+        
   
         
         highlighter.setAutoDraw(True)
@@ -283,7 +296,7 @@ class Keyboard(object):
         core.quit()
 
 
-def test(n_trials, code="onoff"):# modulated gold codes used
+def test(n_trials, vis_angle,key_ypos, p300_arg, code="onoff"):# modulated gold codes used
     """
     Example experiment with initial setup and highlighting and presenting a few trials.
     """
@@ -291,7 +304,7 @@ def test(n_trials, code="onoff"):# modulated gold codes used
     STREAM = False # True during the actual experiment
     SCREEN = 2 # change for projection (0 during the actual experiment)
     SCREEN_SIZE = (1536, 864)# # Mac: (1792, 1120), LabPC: (1920, 1080), HP: 1536, 864
-    SCREEN_WIDTH = 35.94  # Mac: (34,5), LabPC: 53.0, 35.94
+    SCREEN_WIDTH = 35.94  # in cm Mac: (34,5), LabPC: 53.0, 35.94
     SCREEN_DISTANCE = 60.0
     SCREEN_COLOR = (0, 0, 0)
     FR = 60  # screen frame rate
@@ -304,7 +317,11 @@ def test(n_trials, code="onoff"):# modulated gold codes used
 
     KEY_WIDTH = 3.0
     KEY_HEIGHT = 3.0
-    KEY_SPACE = 12
+    
+    # key space and its corresponding visual angle in degrees(inner edge of left stimuli to inner edge of right stimuli)
+    # tan(theta/2) = (keyspace/2)/SCREEN_DISTANCE; therefore keyspace = 2*60* tan(theta/2); where theta is expected in radians    
+    KEY_SPACE = 120 * np.tan(np.radians(vis_angle/2))
+    
     KEY_COLORS = ["black", "white", "green", "blue"]
     KEYS = ["N", 
             "Y"]
@@ -340,8 +357,11 @@ def test(n_trials, code="onoff"):# modulated gold codes used
     
     for key_i in range(len(KEYS)):
         
-        # key_2_add = KEYS[key_i]
-        y_pos = -(0.5)* ppd - TEXT_FIELD_HEIGHT * ppd
+        # placing the keys either at the 'same' level as the fixation cross or 'below' it
+        if key_ypos== 'below': # default 
+            y_pos = -(0.5)* ppd - TEXT_FIELD_HEIGHT * ppd
+        else:
+            y_pos = 0
         
         if key_i==1:
             x_pos = (-1)*(KEY_WIDTH + KEY_SPACE) * ppd 
@@ -449,14 +469,26 @@ def test(n_trials, code="onoff"):# modulated gold codes used
             highlights[target_key] = [0]
 
             # Trial
-            keyboard.add_highlighter(target_key,color="yellow",lineWidth=5)#red is [1,-1,-1]
+            # Adding a p300 cue
+            rand_int = np.random.randint(0,n_trials)
+            count = 0
+            
+            if p300_arg == 'True':
+                import time
+                if i_trial== rand_int:
+                    keyboard.add_highlighter(target_key,color="red",lineWidth=5, size_str = 'big')#red is [1,-1,-1]; add highlighter
+                    keyboard.window.flip() 
+                    time.sleep(0.5) # freezing the output for 300ms             
+                    print('trial for highlighter was', i_trial)
+                    count +=1     
+                    keyboard.add_highlighter(target_key,color = [0,0,0],lineWidth=6, size_str='big')
+                    
+            keyboard.add_highlighter(target_key,color="yellow",lineWidth=5, size_str = 'same')#red is [1,-1,-1]
             keyboard.run(codes, TRIAL_TIME, 
                 start_marker=["visual", "cmd", "start_trial", json.dumps(1+i_trial)], 
                 stop_marker=["visual", "cmd", "stop_trial", json.dumps(1+i_trial)],chosen_letter = chosen_letter)
-            keyboard.add_highlighter(target_key,color = [0,0,0],lineWidth=6)
-            
-            
-            
+            keyboard.add_highlighter(target_key,color = [0,0,0],lineWidth=6, size_str = 'same')          
+                        
             
         
             # text += target_key
@@ -469,10 +501,10 @@ def test(n_trials, code="onoff"):# modulated gold codes used
             #     stop_marker=["visual", "cmd", "stop_feedback", json.dumps(1+i_trial)])
             # highlights[target_key] = [0]
 
-            # # Inter-trial time
-            # keyboard.run(highlights, ITI_TIME, 
-            #     start_marker=["visual", "cmd", "start_intertrial", json.dumps(1+i_trial)], 
-            #     stop_marker=["visual", "cmd", "stop_intertrial", json.dumps(1+i_trial)])
+            # Inter-trial time
+            keyboard.run(highlights, ITI_TIME, 
+                start_marker=["visual", "cmd", "start_intertrial", json.dumps(1+i_trial)], 
+                stop_marker=["visual", "cmd", "stop_intertrial", json.dumps(1+i_trial)])
 
     # Stop experiment
     keyboard.log(marker=["visual", "cmd", "stop_experiment", ""])
@@ -487,8 +519,11 @@ def test(n_trials, code="onoff"):# modulated gold codes used
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="Test keyboard.py")
-    parser.add_argument("-n", "--ntrials", type=int, help="number of trials", default=20)
+    parser.add_argument("-n", "--ntrials", type=int, help="number of trials", default=2)
     parser.add_argument("-c", "--code", type=str, help="code set to use", default="mgold_61_6521")
+    parser.add_argument("-vs_ang","--vis_angle", type = float, default = 7.5)
+    parser.add_argument('-kyps',"--key_ypos",type= str, default = 'below')
+    
     args = parser.parse_args()
-    args.ntrials = 3
-    test(n_trials=args.ntrials, code=args.code)
+
+    test(n_trials=args.ntrials, vis_angle= args.vis_angle, key_ypos = args.key_ypos,code=args.code)
