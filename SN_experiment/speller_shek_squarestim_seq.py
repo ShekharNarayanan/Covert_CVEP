@@ -526,7 +526,8 @@ if __name__ == "__main__":
     parser.add_argument("-c", "--code", type=str, help="code set to use", default="mgold_61_6521")
     parser.add_argument("-vs_ang","--vis_angle", type = float, default = 7.5)
     parser.add_argument('-kyps',"--key_ypos",type= str, default = 'below')
+    parser.add_argument("--p300_arg",type= str, default = 'False')
     
     args = parser.parse_args()
 
-    test(n_trials=args.ntrials, vis_angle= args.vis_angle, key_ypos = args.key_ypos,code=args.code)
+    test(n_trials=args.ntrials, vis_angle= args.vis_angle, key_ypos = args.key_ypos,p300_arg = args.p300_arg,code=args.code)
