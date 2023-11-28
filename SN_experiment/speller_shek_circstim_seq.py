@@ -5,11 +5,13 @@
 
 Python implementation of a keyboard for the noise-tagging project.
 """
-'''Notes:
-- Press Q to quit
-- Modified: Keyboard is replaced with just the Y and N keys
-- Added: "+" is placed in between the two classes
-- Added: Sequential format for showing the stimuli- starts with only N flashing, then Y and then both.
+'''Modifications @ SN
+- Modified: The keyboard is replaced with just the Y and N keys.
+- Added: "+" is placed in between the two classes.
+- Added: Sequential format for showing the stimuli- starts with only N flashing, then Y, and then both.
+- Added: Option to change the visual angle between the two classes.
+- Added: Option for changing the placement of stimuli relative to the fixation cross.
+- Added: Option to use the p300 paradigm along with the current setup.
 '''
 'Try using a range of colors for the highlighter; pick 3/4 max contrasting colors and randomly pick them during a trial'
 import os, json
