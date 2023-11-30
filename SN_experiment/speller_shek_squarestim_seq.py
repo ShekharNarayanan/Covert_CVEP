@@ -12,7 +12,6 @@ Python implementation of a keyboard for the noise-tagging project.
 - Added: Sequential format for showing the stimuli- starts with only N flashing, then Y and then both.
 - Added: Option to change the visual angle between the two classes.
 - Added: Option for changing the placement of stimuli relative to the fixation cross.
-- Added: Option to use the p300 paradigm along with the current setup.
 
 '''
 
@@ -217,7 +216,7 @@ class Keyboard(object):
             else:
                 self.outlet.push_sample(marker)    
     
-    def run(self, codes, duration=None, start_marker=None, stop_marker=None, chosen_letter = None):
+    def run(self, codes, duration=None, start_marker=None, stop_marker=None, flashing_letter = None):
         """
         Present a trial with concurrent flashing of each of the symbols.
 
@@ -229,7 +228,7 @@ class Keyboard(object):
                 The duration of the trial in seconds. If the duration is longer than the code
                 sequence, it is repeated. If no duration is given, the full length of the first 
                 code is used. Default: None
-            chosen_letter (str): 
+            flashing_letter (str): 
                 This argument decides which stimuli will be flashing. Options : 'Y', 'N' and 'both'. This is used to make a sequential paradigm
         """
         # Set number of frames
@@ -257,10 +256,10 @@ class Keyboard(object):
             # Draw keys with color depending on code state
             for name, code in codes.items():
                 
-                if chosen_letter == 'both':
+                if flashing_letter == 'both':
                     self.keys[name][code[i % len(code)]].draw()
                     
-                elif name == chosen_letter or name == 'stt':
+                elif name == flashing_letter or name == 'stt':
                                         
                     self.keys[name][code[i % len(code)]].draw()   # drawning the chosen key and stt, only the chosen key flashes now             
                                         
@@ -301,7 +300,7 @@ class Keyboard(object):
         core.quit()
 
 
-def test(n_trials, vis_angle,key_ypos, p300_arg, code="onoff"):# modulated gold codes used
+def test(n_trials, vis_angle,key_ypos, code="onoff"):# modulated gold codes used
     """
     Example experiment with initial setup and highlighting and presenting a few trials.
     """
@@ -431,40 +430,35 @@ def test(n_trials, vis_angle,key_ypos, p300_arg, code="onoff"):# modulated gold 
     keyboard.run(highlights, 5.0)
     keyboard.set_field_text("text", "")
     
-    # three blocks for the sequential stimulation
-    chosen_letters = ['N', 'Y','both'] 
+    # run matrices with 1's and 0's   
+    run_1 = np.random.permutation(np.arange(n_trials) % 2).astype("uint8")
+    run_2 = np.random.permutation(run_1)     
+    run_3 = np.random.permutation(run_2)
     
-    # binary array with 1s and zeros for target key selection (for the the third block)
-    trial_vec = np.random.permutation(np.arange(n_trials) % 2).astype("uint8")
+    #concatenating all runs
+    runs = np.vstack((run_1,run_2,run_3))
+    # choices for chosen_keys
+    keys = ['N','Y']
     
     #  loop blocks
-    for block in range(len(chosen_letters)):
-        chosen_letter = chosen_letters[block]
-        
-        print(f"starting block for {chosen_letter}") 
-        
-        # Choosing trials for the  p300 cue (1/3rd of all trials- randomly chosen)
-        all_trials = np.arange(n_trials) # array containing all trial indices
-        num_elements = int(np.round(len(all_trials)/3))  # collecting len/3 number of trials
-        p300_trials = np.random.choice(all_trials,size = num_elements)      
+    for run in range(runs.shape[0]):       
+        run_current = runs[run,:]
+    
 
         # Loop trials
         text = ""
+        keyboard.set_field_text("text", "")
         for i_trial in range(n_trials):
             print("i trial is",i_trial)
-                        
-            # Set target (for the third block, both keys are flashing)
-            if block == 2:
-                
-                target = int(trial_vec[i_trial]) # we need to select the target randomly from the given binary vector
-                
-            else:
-                target = block             
-
-            # target_key = KEYS[int(target) // len(KEYS[0])][int(target) % len(KEYS[0])]
-            
+            target = int(run_current[i_trial])
             target_key = KEYS[target]
-
+                        
+            # Choose which key will flash (for the third run, both keys are flashing)
+            if run == 0 or run == 1:                
+                flashing_letter = keys[target]
+            else:
+                flashing_letter = 'both'           
+            
             print(f"{1 + i_trial:03d}/{n_trials}\t{target_key}\t{target}")
             
             keyboard.log(["visual", "param", "target", json.dumps(target)])
@@ -478,25 +472,11 @@ def test(n_trials, vis_angle,key_ypos, p300_arg, code="onoff"):# modulated gold 
                 stop_marker=["visual", "cmd", "stop_cue", json.dumps(1+i_trial)])
             highlights[target_key] = [0]
 
-            # Trial
-            
-            count = 0
-            
-            if p300_arg == 'True':
-                print('p300 trials',p300_trials)
-                if i_trial in p300_trials:
-                
-                    keyboard.add_highlighter(target_key,color="red",lineWidth=5, size_str = 'big')#red is [1,-1,-1]; add highlighter
-                    keyboard.window.flip() 
-                    time.sleep(0.5) # freezing the output for 300ms             
-                    print('trial for highlighter was', i_trial)
-                    count +=1     
-                    keyboard.add_highlighter(target_key,color = [0,0,0],lineWidth=6, size_str='big')
-                    
+            # Trial                     
             keyboard.add_highlighter(target_key,color="yellow",lineWidth=5, size_str = 'same')#red is [1,-1,-1]
             keyboard.run(codes, TRIAL_TIME, 
                 start_marker=["visual", "cmd", "start_trial", json.dumps(1+i_trial)], 
-                stop_marker=["visual", "cmd", "stop_trial", json.dumps(1+i_trial)],chosen_letter = chosen_letter)
+                stop_marker=["visual", "cmd", "stop_trial", json.dumps(1+i_trial)],flashing_letter = flashing_letter)
             keyboard.add_highlighter(target_key,color = [0,0,0],lineWidth=6, size_str = 'same')          
                         
             
@@ -515,6 +495,11 @@ def test(n_trials, vis_angle,key_ypos, p300_arg, code="onoff"):# modulated gold 
             keyboard.run(highlights, ITI_TIME, 
                 start_marker=["visual", "cmd", "start_intertrial", json.dumps(1+i_trial)], 
                 stop_marker=["visual", "cmd", "stop_intertrial", json.dumps(1+i_trial)])
+            
+        if run != 2:            
+            keyboard.set_field_text("text", "Press any key to start the next block :)")  
+            event.waitKeys()
+            keyboard.set_field_text("text", "")  
 
     # Stop experiment
     keyboard.log(marker=["visual", "cmd", "stop_experiment", ""])
@@ -529,12 +514,11 @@ def test(n_trials, vis_angle,key_ypos, p300_arg, code="onoff"):# modulated gold 
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="Test keyboard.py")
-    parser.add_argument("-n", "--ntrials", type=int, help="number of trials", default=2)
+    parser.add_argument("-n", "--ntrials", type=int, help="number of trials", default=1)
     parser.add_argument("-c", "--code", type=str, help="code set to use", default="mgold_61_6521")
     parser.add_argument("-vs_ang","--vis_angle", type = float, default = 7.5)
     parser.add_argument('-kyps',"--key_ypos",type= str, default = 'below')
-    parser.add_argument("--p300_arg",type= str, default = 'True')
     
     args = parser.parse_args()
 
-    test(n_trials=args.ntrials, vis_angle= args.vis_angle, key_ypos = args.key_ypos,p300_arg = args.p300_arg,code=args.code)
+    test(n_trials=args.ntrials, vis_angle= args.vis_angle, key_ypos = args.key_ypos,code=args.code)
