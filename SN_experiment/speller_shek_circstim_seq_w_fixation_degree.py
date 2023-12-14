@@ -148,8 +148,7 @@ class Keyboard(object):
             
             
     
-
-        
+       
   
 
     def add_key(self, name, size, pos, images=["black.png", "white.png"]):
@@ -254,7 +253,7 @@ class Keyboard(object):
             flashing_letter (str): 
                 This argument decides which stimuli will be flashing. Options : 'Y', 'N' and 'both'. This is used to make a sequential paradigm
         """
-        # Set number of frames
+         # Set number of frames
         if duration is None:
             n_frames = len(codes[list(codes.keys())[0]])
         else:
@@ -289,12 +288,7 @@ class Keyboard(object):
                 else:
                     self.keys[name][0].draw() # drawing the key but keeping it constantly as black
                
-            self.window.flip()  
-            
-            
-
-        # Send stop markers
-        self.log(stop_marker)
+            self.window.flip()   
 
         # Set autoDraw to True to keep app visible
         for key in self.keys.values():
@@ -382,18 +376,16 @@ def test(n_trials, vis_angle, deg_ypos, code="onoff"):# modul gold codes
     
     for key_i in range(len(KEYS)):
 
-        # placing the keys either at the 'same' level as the fixation cross or 'below' it
-        # if key_ypos== 'below': # default 
-        #     y_pos = -(0.5)* ppd - TEXT_FIELD_HEIGHT * ppd
-        # else:
-        #     y_pos = 0
+
         y_pos =  -KEY_SPACE/2* np.tan(np.radians(deg_ypos)) * ppd - TEXT_FIELD_HEIGHT * ppd
         print('ypos is',y_pos)
-        if key_i==1:
-            x_pos = (-1)*(KEY_WIDTH + KEY_SPACE) * ppd 
+        if key_i==0:
+           
+            x_pos = (1)*(KEY_WIDTH + KEY_SPACE) * ppd
 
         else:
-            x_pos = (1)*(KEY_WIDTH + KEY_SPACE) * ppd 
+            x_pos = (-1)*(KEY_WIDTH + KEY_SPACE) * ppd
+       
 
         images = [f"images/{KEYS[key_i]}_{color}.png" for color in KEY_COLORS]
         keyboard.add_key(KEYS[key_i], (KEY_WIDTH * ppd, KEY_HEIGHT * ppd), (x_pos, y_pos), images)
@@ -404,6 +396,7 @@ def test(n_trials, vis_angle, deg_ypos, code="onoff"):# modul gold codes
     if code != "onoff":
         os.chdir(r"C:\Users\s1081686\Desktop\RA_Project\Scripts\pynt_codes\SN_experiment")
         tmp = np.load(f"codes\{code}.npz")["codes"]
+        print(tmp.shape)
     codes = dict()
     i = 0
     for key in KEYS:
@@ -411,7 +404,9 @@ def test(n_trials, vis_angle, deg_ypos, code="onoff"):# modul gold codes
         if code == "onoff":
             codes[key] = [1, 0]
         else:
+               
             codes[key] = tmp[:, i].tolist()
+
         i += 1
 
     if code == "onoff":
@@ -533,10 +528,10 @@ def test(n_trials, vis_angle, deg_ypos, code="onoff"):# modul gold codes
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="Test keyboard.py")
-    parser.add_argument("-n", "--ntrials", type=int, help="number of trials", default=2)
+    parser.add_argument("-n", "--ntrials", type=int, help="number of trials", default=1)
     parser.add_argument("-c", "--code", type=str, help="code set to use", default="mgold_61_6521")
-    parser.add_argument("-vs_ang","--vis_angle", type = float, default = 7.5)
-    parser.add_argument('-kyps',"--deg_ypos",type= float, default = 7.5)
+    parser.add_argument("-vs_ang","--vis_angle", type = float,help = 'visual angle between stimuli', default = 7.5)# degree x rename 
+    parser.add_argument('-kyps',"--deg_ypos",type= float,help = 'degrees from the fixation cross', default = 7.5)
     
     args = parser.parse_args()
 

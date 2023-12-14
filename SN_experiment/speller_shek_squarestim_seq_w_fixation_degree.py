@@ -361,11 +361,7 @@ def test(n_trials, vis_angle, deg_ypos, code="onoff"):# modulated gold codes use
     
     for key_i in range(len(KEYS)):
         
-        # placing the keys either at the 'same' level as the fixation cross or 'below' it
-        # if key_ypos== 'below': # default 
-        #     y_pos = -(0.5)* ppd - TEXT_FIELD_HEIGHT * ppd
-        # else:
-        #     y_pos = 0
+        
         y_pos =  -KEY_SPACE/2* np.tan(np.radians(deg_ypos)) * ppd - TEXT_FIELD_HEIGHT * ppd
         print('ypos is',y_pos)
         if key_i==0:
@@ -419,7 +415,6 @@ def test(n_trials, vis_angle, deg_ypos, code="onoff"):# modulated gold codes use
     event.waitKeys()
 
    
-    
     print("Starting.")
 
 
