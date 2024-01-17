@@ -29,7 +29,7 @@ KEY_WIDTH = 3.0
 KEY_HEIGHT = 3.0
 
 # Visual Angle Parameters 
-deg_xpos = 4 # angle between the two stimuli on the screen
+deg_xpos = 5.8 # angle between the two stimuli on the screen
 deg_ypos = 0 # angle from the fixation point
 
 # key space and its corresponding visual angle in degrees(inner edge of left stimuli to inner edge of right stimuli)
@@ -38,22 +38,28 @@ deg_ypos = 0 # angle from the fixation point
 KEY_SPACE = 120 * np.tan(np.radians(deg_xpos/2))
 
 # Key colors and keys
-KEY_COLORS = ["white", "blue"]
+KEY_COLORS = ["black", "white"]
 KEYS = ["Z", "L", "N", "T", "X"]
 
 # Duration parameters
-CUE_TIME = 1  #0.8
+CUE_TIME = 0#1  #0.8
 TRIAL_TIME = 15.5 # 10 for overt// dk for covert, 5 reps
 FEEDBACK_TIME = 0#0.5 -->  feedback is blue; cue is green
-ITI_TIME = 2#0.5
+ITI_TIME = 0#2#0.5
 
 # chosen code
 code = 'mgold_61_6521_mod'
 
 # number of trials 
-n_trials = 2
+n_trials = 4
 
 
+'flashes should be black and white!! '
+'every letter could be a different letter'
+'start the lsl recorder click the tick option, where its saved on the right, other deets are obvious then press start'
+
+'first start this script, press start on lsl, then start the task'
+'for log, we need to know exactly what letter was being displed -- check the run function'
 #---------------------------------------------------------------
 # Setup
 #---------------------------------------------------------------
@@ -66,7 +72,9 @@ ppd = keyboard.get_pixels_per_degree()
 x_pos = -SCREEN_SIZE[0] / 2 + STT_WIDTH / 2 * ppd
 y_pos = SCREEN_SIZE[1] / 2 - STT_HEIGHT / 2 * ppd
 images = ["images/black.png", "images/white.png"]
-stt_image = keyboard.image_selector("stt", (STT_WIDTH * ppd, STT_HEIGHT * ppd), (x_pos, y_pos), images,draw = False) 
+
+'stt image should be there constantly'
+stt_image = keyboard.image_selector("stt", (STT_WIDTH * ppd, STT_HEIGHT * ppd), (x_pos, y_pos), images) 
 # print(stt_image['stt'][1])
 
 # # Add text field at the top of the screen
@@ -85,10 +93,10 @@ All_Images_Left = {}
 All_Images_Right = {}
 for key_i in range(len(KEYS)):
     key = KEYS[key_i]      
-    images = [f"images/{KEYS[key_i]}_{color}.png" for color in KEY_COLORS]
+    images = [f"images_MIXED_COLORS/{KEYS[key_i]}_{color}.png" for color in KEY_COLORS]
             
-    All_Images_Left[key] = keyboard.image_selector(key, (KEY_WIDTH * ppd, KEY_HEIGHT * ppd), (x_pos_left,y_pos_both), images,draw = False) 
-    All_Images_Right[key] = keyboard.image_selector(key, (KEY_WIDTH * ppd, KEY_HEIGHT * ppd), (x_pos_right,y_pos_both), images,draw = False) 
+    All_Images_Left[key] = keyboard.image_selector(key, (KEY_WIDTH * ppd, KEY_HEIGHT * ppd), (x_pos_left,y_pos_both), images) 
+    All_Images_Right[key] = keyboard.image_selector(key, (KEY_WIDTH * ppd, KEY_HEIGHT * ppd), (x_pos_right,y_pos_both), images) 
 
 All_Images = [stt_image,All_Images_Left,All_Images_Right]
 
@@ -142,75 +150,74 @@ run_1 = np.random.permutation(np.arange(n_trials) % 2).astype("uint8")
 run_2 = np.random.permutation(run_1)     
 run_3 = np.random.permutation(run_2)
 
-# concatenating all runs
+# concatenating all runs (helps with indexing in the loop below)
 runs = np.vstack((run_1,run_2,run_3))
 
-#  loop through runs
-for run in range(runs.shape[0]):       
-    run_current = runs[run,:]
-    run_accuracy_vec = []
+# Specifying parameters for key sequence
+target_letter= 'X'
+letter_change_time_msec = 500 # The duration (msec) between the occurrance of two different letters
+total_frames = int(TRIAL_TIME*FR) # Total frames within a trial      
+change_letters = np.round(letter_change_time_msec/(16.67))  # The number of frames after which a new letter will appear on the screen
+target_dist_min = 5 # min target distance
+sequence_size = int(np.ceil(total_frames/change_letters)) # size of sequence
+max_targets = int(np.round(sequence_size/ (target_dist_min+1))) # maximum target occurrances possible in the trial
+print('max targets', max_targets)
 
-    # Loop trials
-    text = ""
+dict_time_vec = []
+
+#  loop through runs
+for run_i in range(runs.shape[0]):       
+    run_current = runs[run_i,:]
+    run_accuracy_vec = [] # % of correctly counted target occurrences in a run
+
+    # Targets in trial
+    targs_left, targs_right = keyboard.targets_in_trial(n_trials=n_trials, max_targets=max_targets)
+
     keyboard.set_field_text("text", "") 
     
     
     for i_trial in range(n_trials):
-        
-        # print("i trial is",i_trial)  
-               
-        # Specifying parameters for key sequence
-        target_letter= 'X'
-        letter_change_time_msec = 500 # The duration (msec) between the occurrance of two different letters
-        total_frames = int(TRIAL_TIME*FR) # Total frames within a trial      
-        change_letters = np.round(letter_change_time_msec/(16.67))  # The number of frames after which a new letter will appear on the screen
-        target_dist_min = 5 # min target distance
-        sequence_size = int(np.ceil(total_frames/change_letters)) # size of sequence
-        max_targets = int(np.round(sequence_size/ (target_dist_min+1))) # maximum target occurrances possible in the trial
-        targets_in_trial =5# random.randint(1,max_targets) # targets in the current trial
-        print('max targets', max_targets)
-        print('targets in this trial',targets_in_trial)
- 
-        
-        Key_Sequence = keyboard.sequence_generator(letter_arr = KEYS, 
-                                                   size_letter_arr = sequence_size, 
-                                                   target_letter= target_letter, 
-                                                   target_dist_min= target_dist_min, 
-                                                   targets_in_trial = targets_in_trial)
-        
-        print(Key_Sequence['cued_sequence'])
+
 
         # Choosing which side will be attended 
-        # if run_current[i_trial] == 0:   
-        #     cued_side = 'LEFT'             
-        #     cue_sym = '<'
-        # else:
-        cued_side = 'RIGHT'
-        cue_sym = '>'
-        # keyboard.set_field_text("text", "")
+        if run_current[i_trial] == 0:   
+            cued_side = 'LEFT'             
+            cue_sym = '<'
+            targets_in_trial_cued = int(targs_left.pop())
+            
+            
+        else:
+            cued_side = 'RIGHT'
+            cue_sym = '>'
+            targets_in_trial_cued = int(targs_right.pop())
+            
+        # targets in non_cued_side
+        
+        targets_in_trial_non_cued =  random.randint(1, max_targets)
+        while targets_in_trial_non_cued == targets_in_trial_cued:
+            targets_in_trial_non_cued = random.randint(1, max_targets)
+            
+        print('targets in this trial',targets_in_trial_cued)# keyboard.set_field_text("text", "")
         print('SIDE',cued_side)
-        # keyboard.add_text_field("text", "",((6 * ppd, 2 * ppd)),(0,0),(0, 0, 0), (-1, -1, -1), auto_draw = True)
-        t1 = pylsl.local_clock()
-        # keyboard.log("internal time before dict", print_time = True)
-        log_dict_trial = dict()       
-        
-#         print(f"{1 + i_trial:03d}/{n_trials}\t{target_key}\t{target}")
-        'make the keys conventional-- similar format' 
-        log_dict_trial['run_and_trial'] = [run, i_trial]
-        log_dict_trial['cued_sequence'] = Key_Sequence['cued_sequence'].tolist()
-        log_dict_trial['non_cued_sequence'] = Key_Sequence['non_cued_sequence'].tolist()
-        log_dict_trial['cued_side'] = cued_side
-        log_dict_trial['target_count'] = targets_in_trial
-        # log_dict_trial['letter_change_time_msec'] = letter_change_time_msec # not needed for each trial 
 
-        keyboard.log(["visual", "param", "target and sequence info",json.dumps(log_dict_trial)])
+        # Generating the key sequence used
+        Key_Sequence = {}
         
-        t2 = pylsl.local_clock()
-        print('time difference between dict entries', (t2 - t1)* 1000, 'ms')
-        # keyboard.log("internal time before dict", print_time = True)
- 
-  
+        cued_sq, non_cued_sq = keyboard.sequence_generator(letter_arr = KEYS, 
+                                    size_letter_arr = sequence_size, 
+                                    target_letter= target_letter, 
+                                    target_dist_min= target_dist_min, 
+                                    targets_in_trial_cued = targets_in_trial_cued, 
+                                    targets_in_trial_non_cued = targets_in_trial_cued, 
+                                    FR = FR, 
+                                    TRIAL_TIME = TRIAL_TIME, 
+                                    letter_change_time_msec = letter_change_time_msec)
         
+        Key_Sequence['cued_sequence'] = cued_sq
+        Key_Sequence['non_cued_sequence'] = non_cued_sq
+        
+     
+
         'introduce a cue time'
         'make the dictionary content more efficient-- all has to be done within a frame 16.67 ms'
         'be careful of the time in the log, histogram of the time the response is logged'
@@ -237,13 +244,13 @@ for run in range(runs.shape[0]):
         keyboard.add_text_field(None,"?",((3 * ppd, 3 * ppd)),(0,0),(0, 0, 0), (-1, -1, -1), auto_draw = True)
         keyboard.window.flip()  
             
-        keys_pressed = event.waitKeys(maxWait= 4)
-        if keys_pressed is None:
-            keys_pressed = '-'
+        key_pressed = event.waitKeys(maxWait= 3) # wait time of 3 seconds
+        if key_pressed is None:
+            key_pressed = '-'
         tick_symbol = u'\u2713'  # Unicode for tick mark (✓)
         cross_symbol = u'\u274C'  # Unicode for cross mark (❌) 
         
-        if keys_pressed[0]== str(targets_in_trial):
+        if key_pressed[0]== str(targets_in_trial_cued):
             keyboard.add_text_field(None, tick_symbol,((3 * ppd, 3 * ppd)),(0,0),(0, 0, 0), (0,1,0), auto_draw = True, font ='Arial Unicode MS' )
             run_accuracy_vec.append(1)
         else:
@@ -251,16 +258,23 @@ for run in range(runs.shape[0]):
             run_accuracy_vec.append(0)
             
         keyboard.set_field_text("text", "")
-   
-#         # text += target_key
-#         # keyboard.set_field_text("text", text)
+        
+        t1 = keyboard.log(['init dict', "", "",""], print_time=True)
+        log_dict_trial = dict()       
+        # 'make the keys conventional-- similar format' 
+        log_dict_trial['run_and_trial'] = [run_i, i_trial]
+        log_dict_trial['cued_sequence'] = Key_Sequence['cued_sequence'].tolist()
+        log_dict_trial['non_cued_sequence'] = Key_Sequence['non_cued_sequence'].tolist()
+        log_dict_trial['cued_side'] = cued_side
+        log_dict_trial['target_count'] = targets_in_trial_cued
+        log_dict_trial['key_pressed'] = key_pressed
+        
 
-#         # # Feedback
-#         # highlights[target_key] = [-1]
-#         # keyboard.run(highlights, FEEDBACK_TIME, 
-#         #     start_marker=["visual", "cmd", "start_feedback", json.dumps(1+i_trial)], 
-#         #     stop_marker=["visual", "cmd", "stop_feedback", json.dumps(1+i_trial)])
-#         # highlights[target_key] = [0]
+        t2 = keyboard.log(["target and sequence info","","",""],json.dumps(log_dict_trial), print_time=True)
+        dict_time_vec.append((t2 - t1)*1000)
+        # t2 = pylsl.local_clock()
+        print('time difference between dict entries', (t2 - t1)* 1000, 'ms')
+
 
         # Inter-trial time
         keyboard.run(Keys=Key_Sequence, All_Images = All_Images, codes = highlights, duration =ITI_TIME, 
@@ -268,8 +282,9 @@ for run in range(runs.shape[0]):
             stop_marker=["visual", "cmd", "stop_intertrial", json.dumps(1+i_trial)])
 
 
-        # keyboard.set_field_text("text", "")  
+
     run_acc_perc = (np.array(run_accuracy_vec).sum()/len(run_accuracy_vec))*100 
+    keyboard.log(["run accuracy %", "", "", ""],json.dumps(run_acc_perc))
     if run_acc_perc<=50:
         color = (1, 0, 0)
     elif run_acc_perc>50 and run_acc_perc<75:
@@ -277,8 +292,9 @@ for run in range(runs.shape[0]):
     else:
         color = (0, 1, 0)
         
-    keyboard.add_text_field(None, f'{run_acc_perc:.0f}%',((3 * ppd, 2 * ppd)),(0,0),(0, 0, 0), color, auto_draw = True)   
-    if run != (runs.shape[0]-1):            
+    keyboard.add_text_field(None, f'{run_acc_perc:.0f}%',((3 * ppd, 2 * ppd)),(0,0),(0, 0, 0), color, auto_draw = True) 
+      
+    if run_i != (runs.shape[0]-1):            
         keyboard.set_field_text("text", "Press any key to start the next block :)")  
         event.waitKeys()
         keyboard.add_text_field(None, ' ',((5 * ppd, 3 * ppd)),(0,0),(0, 0, 0), (-1, -1, -1), auto_draw = True)  
@@ -286,7 +302,14 @@ for run in range(runs.shape[0]):
     # else:
         
         
-    
+import matplotlib.pyplot as plt
+import numpy as np
+plt.figure(figsize = (10,4))
+plt.hist(np.array(dict_time_vec))
+plt.xlabel('time elapsed (ms)')
+plt.ylabel('freq')
+plt.title('Time taken to make log dictionary') 
+plt.show()   
 
 # Stop experiment
 keyboard.log(marker=["visual", "cmd", "stop_experiment", ""])
@@ -296,3 +319,5 @@ print("Stopping.")
 keyboard.set_field_text("text", "")
 keyboard.quit()
 print("Finished.")
+
+

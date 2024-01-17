@@ -52,7 +52,7 @@ class Keyboard(object):
         self.monitor.setSizePix(size)
 
         # Set up window
-        self.window = visual.Window(monitor=self.monitor, screen=screen, units="pix", size=size, color=window_color, fullscr=True, waitBlanking=False, allowGUI=False,allowStencil=True)
+        self.window = visual.Window(monitor=self.monitor, screen=screen, units="pix", size=size, color=window_color, fullscr=False, waitBlanking=False, allowGUI=False,allowStencil=True)
         self.window.setMouseVisible(False)
 
         # Initialize keys and fields
@@ -123,7 +123,7 @@ class Keyboard(object):
         return img
  
 
-    def image_selector(self, name, size, pos , images=["white.png", "blue.png"],draw= False):
+    def image_selector(self, name, size, pos , images=["white.png", "blue.png"]):
         """
         Add a key to the keyboard.
 
@@ -157,13 +157,15 @@ class Keyboard(object):
 
             images_out[name].append(image_stim)
             
-        if draw == True:
+        if name == 'stt':
             images_out[name][0].setAutoDraw(True)
+            
+            # self.window.flip()
                
             
     
         return images_out
-        # # Set autoDraw to True for first default key to keep app visible
+        # Set autoDraw to True for first default key to keep app visible
         # self.keys[name][0].setAutoDraw(True)
         
        
@@ -210,10 +212,6 @@ class Keyboard(object):
 
     def log(self, marker, on_flip=False, print_time =  False):
         import pylsl
-        timestamp = pylsl.local_clock()
-        if print_time == True:
-            print(timestamp)
-        
 
         if self.stream and not marker is None:
             if not isinstance(marker, list):
@@ -222,8 +220,10 @@ class Keyboard(object):
                 self.window.callOnFlip(self.outlet.push_sample, marker)
             else:
 
-                self.outlet.push_sample(marker, timestamp=timestamp)  
-        
+                self.outlet.push_sample(marker)  
+        return pylsl.local_clock()
+    
+
 
     
     def run(self, Keys = None, All_Images = None, codes = None, letter_change_time_msec=1000, duration=None, start_marker=None, stop_marker=None, cued_side = None): # flashing letter can be replaced by flashing side
@@ -272,6 +272,15 @@ class Keyboard(object):
         # Accessing all the codes
         code_left = codes['LEFT']
         code_right = codes['RIGHT']
+        
+        for i in range(len(All_Images)):
+            if i==0:
+                stt_image  = All_Images[0]
+                stt_image['stt'][0].setAutoDraw(False)
+                
+                
+                
+            # .setAutoDraw(False)
         # Loop frame flips
         for i in range(n_frames): 
 
@@ -286,7 +295,8 @@ class Keyboard(object):
             for name, code in codes.items(): 
 
                 if name == 'stt':
-
+                    'set autodraw false here'
+                    # stt_image["stt"].setAutoDraw(True)
                     stt_image["stt"][code[i % len(code)]].draw()#[code_stt[i % len(code)]].draw()
     
             if cued_side == 'LEFT' :            
@@ -300,7 +310,10 @@ class Keyboard(object):
                     # Dict_Images_left[lkey_chosen][lkey_chosen][code_left[i % len(code_left)]].draw()
                     # Dict_Images_right[rkey_chosen][rkey_chosen][code_right[i % len(code_right)]].draw()
                     
-                    # other side does not flash option       
+                    # other side does not flash option
+                    # send keys to the log here 
+                    # self.log("Right_and_Left_Keys", [lkey_chosen, rkey_chosen])
+                    
                     Dict_Images_left[lkey_chosen][lkey_chosen][code_left[i % len(code_left)]].draw()                 
                     Dict_Images_right[rkey_chosen][rkey_chosen][0].draw()
 
@@ -352,21 +365,31 @@ class Keyboard(object):
         # Send stop markers
         self.log(stop_marker)
 
-        # Set autoDraw to True to keep app visible
-        for key in self.keys.values():
-            key[0].setAutoDraw(True)
+        # # Set autoDraw to True to keep app visible
+        for i in range(len(All_Images)):
+            if i==0:
+                stt_image  = All_Images[0]
+                stt_image['stt'][0].setAutoDraw(True)
         self.window.flip()
         
-    def sequence_generator(self, letter_arr = None, size_letter_arr = None, target_letter= None, target_dist_min= 5, targets_in_trial = None):
-        print(letter_arr)
-        # Initializing output
-        Output_Sequence = dict()
+    def sequence_generator(self, letter_arr = None, size_letter_arr = None, target_letter= None, target_dist_min= 5, targets_in_trial_cued = None, targets_in_trial_non_cued = None, FR = 60, TRIAL_TIME = 15.5, letter_change_time_msec = 500):
+        
+        # # Initializing output
+        # Output_Sequence = dict()
+        letter_change_time_msec = 500 # The duration (msec) between the occurrance of two different letters
+        total_frames = int(TRIAL_TIME*FR) # Total frames within a trial      
+        change_letters = np.round(letter_change_time_msec/(16.67))  # The number of frames after which a new letter will appear on the screen
+        target_dist_min = 5 # min target distance
+        sequence_size = int(np.ceil(total_frames/change_letters)) # size of sequence
+        max_targets = int(np.round(sequence_size/ (target_dist_min+1))) # maximum target occurrances possible in the trial
         
         # Defining an array with letters without the target letter  (size = len(letter_arr) - 1)  
         letter_arr_non_target = [letter for letter in letter_arr if letter != target_letter] # does not contain the target letter, see usage later in adjacency rule       
         
         # Defining the array for the cued side
-        cued_array = np.array(random.choices(letter_arr_non_target, k = size_letter_arr)) # target letters will be placed in this array later       
+        cued_array = np.array(random.choices(letter_arr_non_target, k = size_letter_arr)) # target letters will be placed in this array later    
+        # non_cued_array  =  np.array(random.choices(letter_arr_non_target, k = size_letter_arr)) 
+        
         cued_array_length = len(cued_array)
         
         # strategy for cued arr: 
@@ -374,8 +397,7 @@ class Keyboard(object):
         # 2. Place the target letter in the said array at random distances with minimum distance = target_dist_min (target distancing rule)
         
         # for noncued arr: 
-        # 1. The adjacency rule will be checked.
-        # 2. Target distancing rule will not be followed. This is done to have an unqual number of target occurrances between the cued and noncued side.
+        # 1. Same rules are followed
         
         # CUED ARRAY: making sure no identical letters are placed next to each other 
         for i in range(len(cued_array) - 1):
@@ -385,20 +407,28 @@ class Keyboard(object):
                     if letter != cued_array[i] and (i == 0 or letter != cued_array[i - 1]):
                         cued_array[i + 1] = letter
                         break
-
+                    
+        # mapping: each letter in the cued array is mapped to another one in letter_arr_non_target
+        mapping = {letter: letter_arr_non_target[(index + len(letter_arr_non_target)//2) % len(letter_arr_non_target)]
+           for index, letter in enumerate(letter_arr_non_target)}
+        
+        # NON_CUED ARRAY: each letter in the cued array is mapped to another one in letter_arr, hence the cued and noncued side will never show the same letter at the same time
+        non_cued_array = np.array([mapping[letter] for letter in cued_array])
+        
+        
         # targets in the current trial
-        target_count_trial = targets_in_trial
-        # print('targets in trial',target_count_trial)
+        target_count_trial_cued = targets_in_trial_cued
+        # print('targets in trial',target_count_trial_cued)
 
         # Calculate the max target distance given the fixed number of target letters in a trial
         
-        tar_dist = np.round(cued_array_length/(target_count_trial))
+        tar_dist = np.round(cued_array_length/(target_count_trial_cued)) + 1
 
         # Initializing loop variables
         current_index = 0
         target_count = 0
 
-        while target_count < target_count_trial and current_index < cued_array_length:
+        while target_count < target_count_trial_cued and current_index < cued_array_length:
 
             deviation = np.random.randint(0,5) # this varies the distance at which the targets are presented
             
@@ -418,19 +448,51 @@ class Keyboard(object):
                 cued_array[current_index] = target_letter
                 target_count +=1
                 current_index += int(tar_dist_new) 
+               
+        'non cued side'
+        current_index = 0
+        target_count = 0
+        
+        target_count_trial_non_cued = targets_in_trial_non_cued
+        tar_dist = np.round(cued_array_length/(target_count_trial_non_cued)) + 1
 
-        # creating a mapping dictionary for the noncued array
-        mapping = {letter: letter_arr[(index + len(letter_arr)//2) % len(letter_arr)]
-           for index, letter in enumerate(letter_arr)}
+        while target_count < target_count_trial_non_cued and current_index < cued_array_length:
+
+            deviation = np.random.randint(0,target_dist_min) # this varies the distance at which the targets are presented
+            
+            if (tar_dist - deviation) <= target_dist_min: # deviation in distance can not be less than the minimum value
+                tar_dist_new =  tar_dist # no changes made
+                 
+            else:
+                tar_dist_new = tar_dist - deviation # new target distance used
+                # print('deviation in tar_dist by',deviation)
+            
+            if  current_index == 0: # the first letter should not be a target
+                non_cued_array[current_index+2] = target_letter 
+                target_count +=1
+                current_index += int(tar_dist_new)+1 
+                
+            else:
+                non_cued_array[current_index] = target_letter
+                target_count +=1
+                current_index += int(tar_dist_new)
+
         
-        # each letter in the cued array is mapped to another one in letter_arr, hence the cued and noncued side will never show the same letter at the same time
-        non_cued_array = np.array([mapping[letter] for letter in cued_array])
+        return cued_array, non_cued_array
+    
+    def targets_in_trial(self,n_trials,max_targets):
         
-        # storing both arrays
-        Output_Sequence['cued_sequence'] = cued_array
-        Output_Sequence['non_cued_sequence'] = non_cued_array
-        
-        return Output_Sequence
+            size_of_arr = int(np.ceil(n_trials / 2))
+
+            while True:
+                array1 = np.random.randint(1, max_targets, size=size_of_arr)
+                array2 = np.random.randint(1, max_targets, size=size_of_arr)
+            # The sum of targets within a run on left and right sides should be the equal. 
+            # This is done to make sure the number of p300 responses are balanced
+                if np.sum(array1)== np.sum(array2):
+                    break
+
+            return array1.tolist(), array2.tolist()
     
     def is_quit(self):
         """
