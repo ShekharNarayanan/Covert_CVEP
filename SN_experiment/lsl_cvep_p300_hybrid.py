@@ -71,7 +71,7 @@ ppd = keyboard.get_pixels_per_degree()
 # Add stimulus timing tracker (stt) at left top of the screen
 x_pos = -SCREEN_SIZE[0] / 2 + STT_WIDTH / 2 * ppd
 y_pos = SCREEN_SIZE[1] / 2 - STT_HEIGHT / 2 * ppd
-images = ["images/black.png", "images/white.png"]
+images = ["images_BOTH_SIZE_INC/black.png", "images_BOTH_SIZE_INC/white.png"]
 
 'stt image should be there constantly'
 stt_image = keyboard.image_selector("stt", (STT_WIDTH * ppd, STT_HEIGHT * ppd), (x_pos, y_pos), images) 
@@ -93,7 +93,7 @@ All_Images_Left = {}
 All_Images_Right = {}
 for key_i in range(len(KEYS)):
     key = KEYS[key_i]      
-    images = [f"images_MIXED_COLORS/{KEYS[key_i]}_{color}.png" for color in KEY_COLORS]
+    images = [f"images_BOTH_SIZE_INC/{KEYS[key_i]}_{color}.png" for color in KEY_COLORS]
             
     All_Images_Left[key] = keyboard.image_selector(key, (KEY_WIDTH * ppd, KEY_HEIGHT * ppd), (x_pos_left,y_pos_both), images) 
     All_Images_Right[key] = keyboard.image_selector(key, (KEY_WIDTH * ppd, KEY_HEIGHT * ppd), (x_pos_right,y_pos_both), images) 
