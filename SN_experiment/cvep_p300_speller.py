@@ -170,7 +170,7 @@ class Keyboard(object):
         
        
 
-    def add_text_field(self, name, text, size, pos, field_color=(0, 0, 0), text_color=(-1, -1, -1), auto_draw = True, font = 'Courier'):
+    def add_text_field(self, name, text, size, pos, field_color=(0, 0, 0), text_color=(-1, -1, -1), auto_draw = True, font = 'Courier New'):
         """
         Add a text field to the keyboard.
 
@@ -241,7 +241,7 @@ class Keyboard(object):
             flashing_letter (str): 
                 This argument decides which stimuli will be flashing. Options : 'Y', 'N' and 'both'. This is used to make a sequential paradigm
         """
-
+        key_dict = {'c': 'circle' , 'h' :'hour_glass', 'i': 'inverted_triangle', 't': 'triangle', 's':'square'}
         if Keys != None:
            cued_sequence = Keys['cued_sequence']
            non_cued_sequence = Keys['non_cued_sequence']
@@ -312,7 +312,7 @@ class Keyboard(object):
                     
                     # other side does not flash option
                     # send keys to the log here 
-                    # self.log("Right_and_Left_Keys", [lkey_chosen, rkey_chosen])
+                    self.log(["Left_and_Right_symbols", "","", ""], [key_dict[lkey_chosen], key_dict[rkey_chosen]])
                     
                     Dict_Images_left[lkey_chosen][lkey_chosen][code_left[i % len(code_left)]].draw()                 
                     Dict_Images_right[rkey_chosen][rkey_chosen][0].draw()
@@ -327,6 +327,7 @@ class Keyboard(object):
                     # Dict_Images_right[rkey_chosen][rkey_chosen][code_right[i % len(code_right)]].draw()
                     
                     # other side does not flash option       
+                    self.log(["Left_and_Right_symbols", "","", ""], [key_dict[lkey_chosen], key_dict[rkey_chosen]])
                     Dict_Images_left[lkey_chosen][lkey_chosen][code_left[i % len(code_left)]].draw()                 
                     Dict_Images_right[rkey_chosen][rkey_chosen][0].draw()
     
@@ -337,6 +338,7 @@ class Keyboard(object):
                     lkey_chosen = non_cued_sequence[int((i-rem1)/change_frames)]
                     rkey_chosen = cued_sequence[int((i-rem1)/change_frames)] # right side will have the cued letter sequence
                     
+                    self.log(["Left_and_Right_symbols", "","", ""] ,[key_dict[lkey_chosen], key_dict[rkey_chosen]])
                     # other side does not flash option                        
                     Dict_Images_right[rkey_chosen][rkey_chosen][code_right[i % len(code_right)]].draw()
                     Dict_Images_left[lkey_chosen][lkey_chosen][0].draw() 
@@ -350,6 +352,7 @@ class Keyboard(object):
                     lkey_chosen = non_cued_sequence[int((i  - rem2)/change_frames)]
                     rkey_chosen = cued_sequence[int((i  - rem2)/change_frames)]  # right side will have the cued letter sequence
                     
+                    self.log(["Left_and_Right_symbols", "","", ""], [key_dict[lkey_chosen], key_dict[rkey_chosen]])
                      # other side does not flash option                        
                     Dict_Images_right[rkey_chosen][rkey_chosen][code_right[i % len(code_right)]].draw()
                     Dict_Images_left[lkey_chosen][lkey_chosen][0].draw() 

@@ -39,7 +39,8 @@ KEY_SPACE = 120 * np.tan(np.radians(deg_xpos/2))
 
 # Key colors and keys
 KEY_COLORS = ["black", "white"]
-KEYS = ["Z", "L", "N", "T", "X"]
+KEYS = ['s', 'c', 'i', 't', 'h'] # rectangle, circle, inv triangle, triangle, hourglass
+
 
 # Duration parameters
 CUE_TIME = 0#1  #0.8
@@ -154,7 +155,7 @@ run_3 = np.random.permutation(run_2)
 runs = np.vstack((run_1,run_2,run_3))
 
 # Specifying parameters for key sequence
-target_letter= 'X'
+target_letter= KEYS[-1]
 letter_change_time_msec = 500 # The duration (msec) between the occurrance of two different letters
 total_frames = int(TRIAL_TIME*FR) # Total frames within a trial      
 change_letters = np.round(letter_change_time_msec/(16.67))  # The number of frames after which a new letter will appear on the screen
