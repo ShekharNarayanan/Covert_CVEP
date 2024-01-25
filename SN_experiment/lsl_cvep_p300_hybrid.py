@@ -39,7 +39,7 @@ KEY_SPACE = 120 * np.tan(np.radians(deg_xpos/2))
 
 # Key colors and keys
 KEY_COLORS = ["black", "white"]
-KEYS = ['s', 'c', 'i', 't', 'h'] # rectangle, circle, inv triangle, triangle, hourglass
+KEYS = ['r', 'c', 'i', 't', 'h'] # rectangle, circle, inv triangle, triangle, hourglass
 
 
 # Duration parameters
