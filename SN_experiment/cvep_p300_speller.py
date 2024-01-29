@@ -226,7 +226,7 @@ class Keyboard(object):
 
 
     
-    def run(self, Keys = None, All_Images = None, codes = None, letter_change_time_msec=1000, duration=None, start_marker=None, stop_marker=None, cued_side = None): # flashing letter can be replaced by flashing side
+    def run(self, Keys = None, All_Images = None, codes = None, letter_change_time_msec=1000, PR = None, duration=None, start_marker=None, stop_marker=None, cued_side = None): # flashing letter can be replaced by flashing side
         """
         Present a trial with concurrent flashing of each of the symbols.
         flashing letter can be replaced by flashing side
@@ -256,8 +256,8 @@ class Keyboard(object):
         #(1/60 hz is 16.67 ms, dividing letter change time/refresh rate tells us after how many frames the letter should be changed)
         # In case of CVEP, code presentation rate is the same as refresh rate, i.e 1 bit = 1 frame.
         # After a certain number of frames, the letter flashing on the screen will change
-        change_frames = int(np.round(letter_change_time_msec/16.67)) 
-   
+        change_frames = int(np.round((letter_change_time_msec/(1 / PR)))) # Presentation Rate is usually set to 60 Hz
+
         # Set number of frames
         if duration is None:
           
@@ -375,33 +375,24 @@ class Keyboard(object):
                 stt_image['stt'][0].setAutoDraw(True)
         self.window.flip()
         
-    def sequence_generator(self, letter_arr = None, size_letter_arr = None, target_letter= None, target_dist_min= 5, targets_in_trial_cued = None, targets_in_trial_non_cued = None, FR = 60, TRIAL_TIME = 15.5, letter_change_time_msec = 500):
-        
-        # # Initializing output
-        # Output_Sequence = dict()
-        letter_change_time_msec = 500 # The duration (msec) between the occurrance of two different letters
-        total_frames = int(TRIAL_TIME*FR) # Total frames within a trial      
-        change_letters = np.round(letter_change_time_msec/(16.67))  # The number of frames after which a new letter will appear on the screen
-        target_dist_min = 5 # min target distance
-        sequence_size = int(np.ceil(total_frames/change_letters)) # size of sequence
-        max_targets = int(np.round(sequence_size/ (target_dist_min+1))) # maximum target occurrances possible in the trial
-        
+    def sequence_generator(self, letter_arr = None, size_letter_arr = None, target_letter= None, targets_in_trial_cued = None, targets_in_trial_non_cued = None, min_target_key_distance = 5):
+
         # Defining an array with letters without the target letter  (size = len(letter_arr) - 1)  
-        letter_arr_non_target = [letter for letter in letter_arr if letter != target_letter] # does not contain the target letter, see usage later in adjacency rule       
-        
+        letter_arr_non_target = [letter for letter in letter_arr if letter != target_letter] # does not contain the target letter, see use later in adjacency rule  
+
         # Defining the array for the cued side
         cued_array = np.array(random.choices(letter_arr_non_target, k = size_letter_arr)) # target letters will be placed in this array later    
         # non_cued_array  =  np.array(random.choices(letter_arr_non_target, k = size_letter_arr)) 
-        
+
         cued_array_length = len(cued_array)
-        
+
         # strategy for cued arr: 
         # 1. Design an array with no two identical letters placed adjacently (adjacency rule).
-        # 2. Place the target letter in the said array at random distances with minimum distance = target_dist_min (target distancing rule)
-        
+        # 2. Place the target letter in the said array at random distances with minimum distance = min_target_key_distance (target distancing rule)
+
         # for noncued arr: 
         # 1. Same rules are followed
-        
+
         # CUED ARRAY: making sure no identical letters are placed next to each other 
         for i in range(len(cued_array) - 1):
             if cued_array[i] == cued_array[i + 1]:
@@ -413,34 +404,35 @@ class Keyboard(object):
                     
         # mapping: each letter in the cued array is mapped to another one in letter_arr_non_target
         mapping = {letter: letter_arr_non_target[(index + len(letter_arr_non_target)//2) % len(letter_arr_non_target)]
-           for index, letter in enumerate(letter_arr_non_target)}
-        
+            for index, letter in enumerate(letter_arr_non_target)}
+
         # NON_CUED ARRAY: each letter in the cued array is mapped to another one in letter_arr, hence the cued and noncued side will never show the same letter at the same time
         non_cued_array = np.array([mapping[letter] for letter in cued_array])
-        
-        
+
+
         # targets in the current trial
         target_count_trial_cued = targets_in_trial_cued
-        # print('targets in trial',target_count_trial_cued)
 
-        # Calculate the max target distance given the fixed number of target letters in a trial
-        
-        tar_dist = np.round(cued_array_length/(target_count_trial_cued)) + 1
+
+        # Calculate the default target distance given the fixed number of target letters in a trial
+        tar_dist = np.round(cued_array_length/(target_count_trial_cued)) 
+        print("tar_dist cued",tar_dist)
+
 
         # Initializing loop variables
         current_index = 0
         target_count = 0
 
-        while target_count < target_count_trial_cued and current_index < cued_array_length:
+        while target_count != target_count_trial_cued and current_index < cued_array_length:
 
             deviation = np.random.randint(0,5) # this varies the distance at which the targets are presented
             
-            if (tar_dist - deviation) <= target_dist_min: # deviation in distance can not be less than the minimum value
+            if (tar_dist - deviation) <= min_target_key_distance: # deviation in distance can not be less than the minimum value
                 tar_dist_new =  tar_dist # no changes made
-                 
+                    
             else:
                 tar_dist_new = tar_dist - deviation # new target distance used
-                # print('deviation in tar_dist by',deviation)
+
             
             if  current_index == 0: # the first letter should not be a target
                 cued_array[current_index+1] = target_letter 
@@ -451,27 +443,31 @@ class Keyboard(object):
                 cued_array[current_index] = target_letter
                 target_count +=1
                 current_index += int(tar_dist_new) 
-               
+                
         'non cued side'
         current_index = 0
         target_count = 0
-        
+
         target_count_trial_non_cued = targets_in_trial_non_cued
-        tar_dist = np.round(cued_array_length/(target_count_trial_non_cued)) + 1
 
-        while target_count < target_count_trial_non_cued and current_index < cued_array_length:
+        # targets in the non_cued_seq will always be less than max_targets, 
+        # so tar_dist here is always > min_target_key_distance
+        tar_dist = np.round(cued_array_length/(target_count_trial_non_cued)) 
 
-            deviation = np.random.randint(0,target_dist_min) # this varies the distance at which the targets are presented
+
+        while target_count != target_count_trial_non_cued and current_index < cued_array_length:
+
+            deviation = np.random.randint(0,min_target_key_distance) # this varies the distance at which the targets are presented
             
-            if (tar_dist - deviation) <= target_dist_min: # deviation in distance can not be less than the minimum value
+            if (tar_dist - deviation) <= min_target_key_distance: # deviation in distance can not be less than the minimum value
                 tar_dist_new =  tar_dist # no changes made
-                 
+                    
             else:
                 tar_dist_new = tar_dist - deviation # new target distance used
                 # print('deviation in tar_dist by',deviation)
             
             if  current_index == 0: # the first letter should not be a target
-                non_cued_array[current_index+2] = target_letter 
+                non_cued_array[current_index+2] = target_letter # the third letter is the target letter 
                 target_count +=1
                 current_index += int(tar_dist_new)+1 
                 
@@ -480,10 +476,10 @@ class Keyboard(object):
                 target_count +=1
                 current_index += int(tar_dist_new)
 
-        
+
         return cued_array, non_cued_array
     
-    def targets_in_trial(self,n_trials,max_targets):
+    def targets_in_trial(self, n_trials, max_targets):
         
             size_of_arr = int(np.ceil(n_trials / 2))
 
