@@ -30,13 +30,13 @@ KEY_WIDTH = 3.0
 KEY_HEIGHT = 3.0
 
 # Visual Angle Parameters 
-deg_xpos = 5.8 # angle between the two stimuli on the screen
+deg_xpos = 4.2 # angle between the two stimuli on the screen
 deg_ypos = 0 # angle from the fixation point
 
 # key space and its corresponding visual angle in degrees(inner edge of left stimuli to inner edge of right stimuli)
 # tan(theta/2) = (keyspace/2)/SCREEN_DISTANCE; therefore keyspace = 2*60* tan(theta/2); where theta is expected in radians 
    
-KEY_SPACE = 120 * np.tan(np.radians(deg_xpos/2))
+KEY_SPACE = deg_xpos 
 
 # Key colors and keys
 KEY_COLORS = ["black", "white"]
