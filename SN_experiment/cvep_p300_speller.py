@@ -227,7 +227,7 @@ class Keyboard(object):
 
 
     
-    def run(self, Keys = None, All_Images = None, codes = None, letter_change_time_msec=250, FR = None, duration=None, start_marker=None, stop_marker=None, cued_side = None): # flashing letter can be replaced by flashing side
+    def run(self, FR, Keys = None, All_Images = None, codes = None, letter_change_time_msec=250, duration=None, start_marker=None, stop_marker=None, cued_side = None): # flashing letter can be replaced by flashing side
         """
         Present a trial with concurrent flashing of each of the symbols.
         flashing letter can be replaced by flashing side
@@ -258,21 +258,21 @@ class Keyboard(object):
         # In case of CVEP, code presentation rate is the same as refresh rate, i.e 1 bit = 1 frame.
         # After a certain number of frames, the letter flashing on the screen will change
         
-        # change_FR_msec = 1000 *(1/ FR)
-        fr_change  = 1/FR * 1000
+       
+        frame_change_time_msec  = (1/FR) 
         
-        change_frames = int(np.round((letter_change_time_msec/ fr_change)))
+        change_frames = int(np.round((letter_change_time_msec/ frame_change_time_msec)))
         print('change frame before loop',change_frames)
    
         # Set number of frames
         if duration is None:
-            print('duration is none')
+        
             n_frames = len(codes[list(codes.keys())[0]])
             
         else:
             
             n_frames = int(duration * self.get_framerate())
-            print('n frames is',n_frames)
+            
 
         # Send start marker
         self.log(start_marker, on_flip=True)
