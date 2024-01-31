@@ -49,14 +49,14 @@ FEEDBACK_TIME = 0#0.5 -->  feedback is blue; cue is green
 ITI_TIME = 0#2#0.5
 
 # Sequence Parameters
+# Sequence Parameters
 target_letter= KEYS[-1]
-FR = FR
 letter_change_time_msec = 250 * 1e-3 # The duration (msec) between the occurrance of two different letters
-total_frames = int(TRIAL_TIME*FR) # Total frames within a trial      
-change_letters = np.round(letter_change_time_msec* 1e-3/(1/FR))  # The number of frames after which a new letter will appear on the screen
-min_target_key_distance = 6*letter_change_time_msec  # min target distance in TIME (duration of 6 letters)
-sequence_size = int(np.ceil(TRIAL_TIME /letter_change_time_msec)) # size of sequence
-max_targets = int((TRIAL_TIME/ (min_target_key_distance))) 
+total_frames = int(TRIAL_TIME*FR) # Total frames within a trial    
+change_letters = np.round(letter_change_time_msec/(1/FR))  # The number of frames after which a new letter will appear on the screen
+min_target_key_distance = 6*letter_change_time_msec # min target distance in TIME (duration of 6 letters)
+sequence_size = int(np.ceil(total_frames /(change_letters))) # size of sequence
+max_targets = int(TRIAL_TIME/ min_target_key_distance)
 
 # chosen code
 code = 'mgold_61_6521_mod'
@@ -290,8 +290,15 @@ for run_i in range(runs.shape[0]):
         event.waitKeys()
         keyboard.add_text_field(None, ' ',((5 * ppd, 3 * ppd)),(0,0),(0, 0, 0), (-1, -1, -1), auto_draw = True)  
         keyboard.set_field_text("text", "") 
-    # else:
-        
+
+    # Stop experiment
+    keyboard.log(marker=["visual", "cmd", "stop_experiment", ""])
+    keyboard.set_field_text("text", "Stopping...")
+    print("Stopping.")
+    keyboard.run(highlights, 5.0)
+    keyboard.set_field_text("text", "")
+    keyboard.quit()
+    print("Finished.")
         
 
 
