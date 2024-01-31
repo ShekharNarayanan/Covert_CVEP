@@ -24,6 +24,7 @@ import random
 # change directory to your experiment folder
 os.chdir(r"C:/Users/s1081686/Desktop/RA_Project/Scripts/pynt_codes/SN_experiment")
 
+
 class Keyboard(object):
     """
     A keyboard with keys and text fields.
@@ -226,7 +227,7 @@ class Keyboard(object):
 
 
     
-    def run(self, Keys = None, All_Images = None, codes = None, letter_change_time_msec=1000, PR = None, duration=None, start_marker=None, stop_marker=None, cued_side = None): # flashing letter can be replaced by flashing side
+    def run(self, Keys = None, All_Images = None, codes = None, letter_change_time_msec=250, FR = None, duration=None, start_marker=None, stop_marker=None, cued_side = None): # flashing letter can be replaced by flashing side
         """
         Present a trial with concurrent flashing of each of the symbols.
         flashing letter can be replaced by flashing side
@@ -241,7 +242,7 @@ class Keyboard(object):
             flashing_letter (str): 
                 This argument decides which stimuli will be flashing. Options : 'Y', 'N' and 'both'. This is used to make a sequential paradigm
         """
-        key_dict = {'c': 'circle' , 'h' :'hour_glass', 'i': 'inverted_triangle', 't': 'triangle', 's':'square'}
+        key_dict = {'c': 'circle' , 'h' :'hour_glass', 'i': 'inverted_triangle', 't': 'triangle', 'r':'rectangle'}
         if Keys != None:
            cued_sequence = Keys['cued_sequence']
            non_cued_sequence = Keys['non_cued_sequence']
@@ -256,15 +257,22 @@ class Keyboard(object):
         #(1/60 hz is 16.67 ms, dividing letter change time/refresh rate tells us after how many frames the letter should be changed)
         # In case of CVEP, code presentation rate is the same as refresh rate, i.e 1 bit = 1 frame.
         # After a certain number of frames, the letter flashing on the screen will change
-        change_frames = int(np.round((letter_change_time_msec/(1 / PR)))) # Presentation Rate is usually set to 60 Hz
-
+        
+        # change_FR_msec = 1000 *(1/ FR)
+        fr_change  = 1/FR * 1000
+        
+        change_frames = int(np.round((letter_change_time_msec/ fr_change)))
+        print('change frame before loop',change_frames)
+   
         # Set number of frames
         if duration is None:
-          
+            print('duration is none')
             n_frames = len(codes[list(codes.keys())[0]])
+            
         else:
-       
+            
             n_frames = int(duration * self.get_framerate())
+            print('n frames is',n_frames)
 
         # Send start marker
         self.log(start_marker, on_flip=True)
@@ -283,6 +291,7 @@ class Keyboard(object):
             # .setAutoDraw(False)
         # Loop frame flips
         for i in range(n_frames): 
+            print('change frame is', change_frames)
 
             
             # Check quiting
@@ -303,8 +312,12 @@ class Keyboard(object):
                 'possible: nothing happens on the non attending side'
                 if (i % (2*change_frames)) < change_frames: 
                     rem1 = i % (2*change_frames)
+                    # print(int((i-rem1)/change_frames))
+                    
+                    
                     lkey_chosen = cued_sequence[int((i-rem1)/change_frames)]  # left side will have the cued letter sequence
                     rkey_chosen = non_cued_sequence[int((i-rem1)/change_frames)]
+                    # print('lkey',lkey_chosen)
                     
                     # both sides flash
                     # Dict_Images_left[lkey_chosen][lkey_chosen][code_left[i % len(code_left)]].draw()
@@ -326,8 +339,9 @@ class Keyboard(object):
                     # Dict_Images_left[lkey_chosen][lkey_chosen][code_left[i % len(code_left)]].draw()
                     # Dict_Images_right[rkey_chosen][rkey_chosen][code_right[i % len(code_right)]].draw()
                     
-                    # other side does not flash option       
+                    # send keys to the log here 
                     self.log(["Left_and_Right_symbols", "","", ""], [key_dict[lkey_chosen], key_dict[rkey_chosen]])
+                    # other side does not flash option       
                     Dict_Images_left[lkey_chosen][lkey_chosen][code_left[i % len(code_left)]].draw()                 
                     Dict_Images_right[rkey_chosen][rkey_chosen][0].draw()
     
@@ -338,7 +352,8 @@ class Keyboard(object):
                     lkey_chosen = non_cued_sequence[int((i-rem1)/change_frames)]
                     rkey_chosen = cued_sequence[int((i-rem1)/change_frames)] # right side will have the cued letter sequence
                     
-                    self.log(["Left_and_Right_symbols", "","", ""] ,[key_dict[lkey_chosen], key_dict[rkey_chosen]])
+                    # send keys to the log here 
+                    self.log(["Left_and_Right_symbols", "","", ""], [key_dict[lkey_chosen], key_dict[rkey_chosen]])
                     # other side does not flash option                        
                     Dict_Images_right[rkey_chosen][rkey_chosen][code_right[i % len(code_right)]].draw()
                     Dict_Images_left[lkey_chosen][lkey_chosen][0].draw() 
@@ -352,6 +367,7 @@ class Keyboard(object):
                     lkey_chosen = non_cued_sequence[int((i  - rem2)/change_frames)]
                     rkey_chosen = cued_sequence[int((i  - rem2)/change_frames)]  # right side will have the cued letter sequence
                     
+                    # send keys to the log here 
                     self.log(["Left_and_Right_symbols", "","", ""], [key_dict[lkey_chosen], key_dict[rkey_chosen]])
                      # other side does not flash option                        
                     Dict_Images_right[rkey_chosen][rkey_chosen][code_right[i % len(code_right)]].draw()
@@ -376,7 +392,7 @@ class Keyboard(object):
         self.window.flip()
         
     def sequence_generator(self, letter_arr = None, size_letter_arr = None, target_letter= None, targets_in_trial_cued = None, targets_in_trial_non_cued = None, min_target_key_distance = 5):
-
+        
         # Defining an array with letters without the target letter  (size = len(letter_arr) - 1)  
         letter_arr_non_target = [letter for letter in letter_arr if letter != target_letter] # does not contain the target letter, see use later in adjacency rule  
 
@@ -476,10 +492,10 @@ class Keyboard(object):
                 target_count +=1
                 current_index += int(tar_dist_new)
 
-
+        
         return cued_array, non_cued_array
     
-    def targets_in_trial(self, n_trials, max_targets):
+    def targets_in_trial(self,n_trials,max_targets):
         
             size_of_arr = int(np.ceil(n_trials / 2))
 
