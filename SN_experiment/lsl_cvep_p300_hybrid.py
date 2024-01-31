@@ -267,7 +267,7 @@ for run_i in range(runs.shape[0]):
 
 
         # Inter-trial time
-        keyboard.run(Keys=Key_Sequence, All_Images = All_Images, codes = highlights, duration =ITI_TIME, 
+        keyboard.run(FR = FR, Keys=Key_Sequence, All_Images = All_Images, codes = highlights, duration =ITI_TIME, 
             start_marker=["visual", "cmd", "start_intertrial", json.dumps(1+i_trial)], 
             stop_marker=["visual", "cmd", "stop_intertrial", json.dumps(1+i_trial)])
 
@@ -291,14 +291,14 @@ for run_i in range(runs.shape[0]):
         keyboard.add_text_field(None, ' ',((5 * ppd, 3 * ppd)),(0,0),(0, 0, 0), (-1, -1, -1), auto_draw = True)  
         keyboard.set_field_text("text", "") 
 
-    # Stop experiment
-    keyboard.log(marker=["visual", "cmd", "stop_experiment", ""])
-    keyboard.set_field_text("text", "Stopping...")
-    print("Stopping.")
-    keyboard.run(highlights, 5.0)
-    keyboard.set_field_text("text", "")
-    keyboard.quit()
-    print("Finished.")
-        
+ # Stop experiment
+ keyboard.log(marker=["visual", "cmd", "stop_experiment", ""])
+ keyboard.set_field_text("text", "Stopping...")
+ print("Stopping.")
+ keyboard.run(highlights, 5.0)
+ keyboard.set_field_text("text", "")
+ keyboard.quit()
+ print("Finished.")
+     
 
 
