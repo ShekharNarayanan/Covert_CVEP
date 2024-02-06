@@ -42,6 +42,11 @@ KEY_COLORS = ["black", "white"]
 KEYS = ['r', 'c', 'i', 't', 'h'] # rectangle, circle, inv triangle, triangle, hourglass
 
 # Duration parameters
+'''
+Total Duration  = n_runs x (run_wait_time + n_trials x (cue_time + trial_time + feedback_time + response_time + ITI_time))
+=> 4 * (5 + 20*(1 + 20 + 2 + 3 + 2)) = 2260s = 37.66 minutes
+'''
+'Run wait time: 5s'
 CUE_TIME = 1#1  #0.8
 TRIAL_TIME = 10 # 10 for overt// dk for covert, 5 reps
 RESPONSE_TIME = 3
@@ -58,6 +63,7 @@ min_target_key_distance = 6*letter_change_time_msec # min target distance in TIM
 sequence_size = int(np.ceil(total_frames /change_letters)) # size of sequence
 
 max_targets = int(TRIAL_TIME/ min_target_key_distance)
+min_targets = max_targets // 3
 
 # chosen code
 code = 'mgold_61_6521_mod'
@@ -166,9 +172,10 @@ print('start marker logged')
 run_1 = np.random.permutation(np.arange(n_trials) % 2).astype("uint8")
 run_2 = np.random.permutation(run_1)     
 run_3 = np.random.permutation(run_2)
+run_4 = np.random.permutation(run_3)
 
 # concatenating all runs (helps with indexing in the loop below)
-runs = np.vstack((run_1,run_2,run_3))
+runs = np.vstack((run_1,run_2,run_3, run_4)))
 
 
 #  loop through runs
@@ -199,9 +206,9 @@ for run_i in range(runs.shape[0]):
             targets_in_trial_cued = int(targs_right.pop())
             
         # targets in non_cued_side
-        targets_in_trial_non_cued =  random.randint(1, max_targets)
+        targets_in_trial_non_cued =  random.randint(min_targets, max_targets)
         while targets_in_trial_non_cued == targets_in_trial_cued:
-            targets_in_trial_non_cued = random.randint(1, max_targets)
+            targets_in_trial_non_cued = random.randint(max_targets, max_targets)
             
         print('targets in this trial',targets_in_trial_cued)# keyboard.set_field_text("text", "")
         print('SIDE',cued_side)
