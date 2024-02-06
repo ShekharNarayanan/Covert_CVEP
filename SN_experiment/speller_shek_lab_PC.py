@@ -44,6 +44,7 @@ KEYS = ['r', 'c', 'i', 't', 'h'] # rectangle, circle, inv triangle, triangle, ho
 # Duration parameters
 CUE_TIME = 1#1  #0.8
 TRIAL_TIME = 10 # 10 for overt// dk for covert, 5 reps
+RESPONSE_TIME = 3
 FEEDBACK_TIME = 1#0.5 -->  feedback is blue; cue is green
 ITI_TIME = 0#2#0.5
 
@@ -249,8 +250,15 @@ for run_i in range(runs.shape[0]):
         keyboard.window.flip()  
         
         # Wait response
-        key_pressed = event.waitKeys(maxWait= 3) # wait time of 3 seconds
-        if key_pressed is None:
+        key_pressed =[]
+        timer = core.CountdownTimer(RESPONSE_TIME)
+        while timer.getTime() > 0:
+            key_pressed += event.getKeys()
+            
+        key_pressed  = [''.join(key_pressed)]
+        print(key_pressed)
+
+        if not key_pressed:
             key_pressed = '-'
         tick_symbol = u'\u2713'  # Unicode for tick mark (✓)
         cross_symbol = u'\u274C'  # Unicode for cross mark (❌) 
