@@ -271,7 +271,7 @@ class Keyboard(object):
             
         else:
             
-            n_frames = int(duration * self.get_framerate())
+            n_frames = int(duration * 60)#self.get_framerate())
             
 
         # Send start marker
