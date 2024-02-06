@@ -12,13 +12,13 @@ import random
 import pylsl
 
 
-STREAM = False # True  when actually testing
+STREAM = True # True  when actually testing
 SCREEN = 0 # change for projection 
 SCREEN_SIZE = (1920, 1080)# # Mac: (1792, 1120), LabPC: (1920, 1080), HP: 1536, 864
 SCREEN_WIDTH = 60.3  # Mac: (34,5), LabPC: 53.0, 35.94
 SCREEN_DISTANCE = 60.0
 SCREEN_COLOR = (0, 0, 0)
-FR = 240  # screen frame rate
+FR = 60  # screen frame rate
 PR = 60  # codes presentation rate
 
 STT_WIDTH = 3# adjust later
@@ -42,16 +42,19 @@ KEY_COLORS = ["black", "white"]
 KEYS = ['r', 'c', 'i', 't', 'h'] # rectangle, circle, inv triangle, triangle, hourglass
 
 # Duration parameters
+# Duration parameters
 '''
 Total Duration  = n_runs x (run_wait_time + n_trials x (cue_time + trial_time + feedback_time + response_time + ITI_time))
 => 4 * (5 + 20*(1 + 20 + 2 + 3 + 2)) = 2260s = 37.66 minutes
 '''
 'Run wait time: 5s'
 CUE_TIME = 1#1  #0.8
-TRIAL_TIME = 10 # 10 for overt// dk for covert, 5 reps
-RESPONSE_TIME = 3
-FEEDBACK_TIME = 1#0.5 -->  feedback is blue; cue is green
-ITI_TIME = 0#2#0.5
+TRIAL_TIME = 20 # 10 for overt// dk for covert, 5 reps
+RESPONSE_TIME = 5
+FEEDBACK_TIME = 2#0.5 -->  feedback is blue; cue is green
+ITI_TIME = 2#0.5
+# number of trials 
+n_trials = 20
 
 # Sequence Parameters
 
@@ -65,13 +68,16 @@ sequence_size = int(np.ceil(total_frames /change_letters)) # size of sequence
 max_targets = int(TRIAL_TIME/ min_target_key_distance)
 min_targets = max_targets // 3
 
+print(total_frames)
+print(change_letters)
+print(sequence_size)
+
+
 # chosen code
 code = 'mgold_61_6521_mod'
 
-# number of trials 
-n_trials = 4
 
-#TODO: fix the logs
+
 
 'flashes should be black and white!! '
 'every letter could be a different letter'
@@ -173,24 +179,26 @@ run_1 = np.random.permutation(np.arange(n_trials) % 2).astype("uint8")
 run_2 = np.random.permutation(run_1)     
 run_3 = np.random.permutation(run_2)
 run_4 = np.random.permutation(run_3)
+run_5 = np.random.permutation(run_4)
 
 # concatenating all runs (helps with indexing in the loop below)
-runs = np.vstack((run_1,run_2,run_3, run_4)))
+runs = np.vstack((run_1,run_2,run_3, run_4,run_5))
 
 
 #  loop through runs
 for run_i in range(runs.shape[0]): 
-    print(' FR is', FR)      
+          
     run_current = runs[run_i,:]
     run_accuracy_vec = [] # % of correctly counted target occurrences in a run
 
     # Targets in trial
-    targs_left, targs_right = keyboard.targets_in_trial(n_trials=n_trials, max_targets=max_targets)
+    targs_left, targs_right = keyboard.targets_in_trial(n_trials=n_trials, min_targets = min_targets, max_targets=max_targets)
 
     # Cue start of run
     keyboard.set_field_text("text", "Starting...")
     core.wait(5, hogCPUperiod= 0.2)
     keyboard.set_field_text("text", "") 
+    
     
     for i_trial in range(n_trials):
 
@@ -203,12 +211,13 @@ for run_i in range(runs.shape[0]):
         else:
             cued_side = 'RIGHT'
             cue_sym = '>'
+
             targets_in_trial_cued = int(targs_right.pop())
             
         # targets in non_cued_side
         targets_in_trial_non_cued =  random.randint(min_targets, max_targets)
         while targets_in_trial_non_cued == targets_in_trial_cued:
-            targets_in_trial_non_cued = random.randint(max_targets, max_targets)
+            targets_in_trial_non_cued = random.randint(min_targets, max_targets)
             
         print('targets in this trial',targets_in_trial_cued)# keyboard.set_field_text("text", "")
         print('SIDE',cued_side)
@@ -221,6 +230,8 @@ for run_i in range(runs.shape[0]):
                                                            target_letter= target_letter,
                                                            targets_in_trial_cued = targets_in_trial_cued, 
                                                            targets_in_trial_non_cued = targets_in_trial_non_cued)
+                                                           
+        print(cued_sq)
         
         print('cued_sq',cued_sq[1])
         Key_Sequence['cued_sequence'] = cued_sq
@@ -245,7 +256,7 @@ for run_i in range(runs.shape[0]):
         keyboard.run(Keys = Key_Sequence, 
                      All_Images = All_Images, 
                      codes = codes, 
-                     letter_change_time_msec= letter_change_time_msec, 
+                     letter_change_time_msec = letter_change_time_msec, 
                      FR = FR,
                      duration = TRIAL_TIME, 
                      start_marker=["visual", "cmd", "start_trial", json.dumps(1+i_trial)], 
@@ -257,13 +268,14 @@ for run_i in range(runs.shape[0]):
         keyboard.window.flip()  
         
         # Wait response
+        
         key_pressed =[]
         timer = core.CountdownTimer(RESPONSE_TIME)
         while timer.getTime() > 0:
             key_pressed += event.getKeys()
             
         key_pressed  = [''.join(key_pressed)]
-        print(key_pressed)
+        # print(key_pressed)
 
         if not key_pressed:
             key_pressed = '-'
@@ -281,7 +293,7 @@ for run_i in range(runs.shape[0]):
             run_accuracy_vec.append(0)
         core.wait(FEEDBACK_TIME, hogCPUperiod= 0.2)
         
-        t1 = keyboard.log(['init dict', "", "",""], print_time=True)
+
         log_dict_trial = dict()       
         # 'make the keys conventional-- similar format' 
         log_dict_trial['run_and_trial'] = [run_i, i_trial]
@@ -291,7 +303,7 @@ for run_i in range(runs.shape[0]):
         log_dict_trial['target_count'] = targets_in_trial_cued
         log_dict_trial['key_pressed'] = key_pressed
         
-
+        keyboard.log(["trial_information","","",json.dumps(log_dict_trial)])
 
         # Inter-trial time
         if ITI_TIME > 0:
@@ -302,7 +314,7 @@ for run_i in range(runs.shape[0]):
 
     # Present performance
     run_acc_perc = (np.array(run_accuracy_vec).sum()/len(run_accuracy_vec))*100 
-    keyboard.log(["run accuracy %", "", "", ""],json.dumps(run_acc_perc))
+    keyboard.log(["run accuracy %", "", "", json.dumps(run_acc_perc)])
     if run_acc_perc<=50:
         color = (1, 0, 0)
     elif run_acc_perc>50 and run_acc_perc<75:
@@ -311,7 +323,7 @@ for run_i in range(runs.shape[0]):
         color = (0, 1, 0)
       
     if run_i != (runs.shape[0]-1):        
-        keyboard.set_field_text("fix", f'accuracy: {run_acc_perc:.0f}%') 
+        keyboard.set_field_text("fix", f'{run_acc_perc:.0f}%') 
         keyboard.set_field_text("text", "Press any key to start the next run :)")  
         event.waitKeys()
         keyboard.set_field_text("fix", "+") 
