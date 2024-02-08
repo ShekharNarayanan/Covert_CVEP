@@ -268,22 +268,32 @@ for run_i in range(runs.shape[0]):
         keyboard.window.flip()  
         
         # Wait response
-        
-        key_pressed =[]
+        response = ''
+        is_completed = False
+        text = visual.TextStim(keyboard.window, text=response, pos=(0, 0), color=(-1,-1,-1))
         timer = core.CountdownTimer(RESPONSE_TIME)
-        while timer.getTime() > 0:
-            key_pressed += event.getKeys()
-            
-        key_pressed  = [''.join(key_pressed)]
-        # print(key_pressed)
+        while not is_completed and timer.getTime() > 0:
 
-        if not key_pressed:
-            key_pressed = '-'
-        tick_symbol = u'\u2713'  # Unicode for tick mark (✓)
-        cross_symbol = u'\u274C'  # Unicode for cross mark (❌) 
+            # Get response
+            key = event.waitKeys()
+            if 'return' in key:
+                is_completed = True
+            elif 'space' in key:
+                response += " "
+            elif 'backspace' in key:
+                response = response[:-1]
+            else:
+                response += key[-1]
+        
+            # Show response
+            text.text = response
+            text.draw()
+            keyboard.window.flip()
+
+        print("response is:", response)
         
         # Present feedback
-        if key_pressed[0]== str(targets_in_trial_cued):
+        if response == str(targets_in_trial_cued):
             keyboard.set_field_text("fix", "+++")
             #keyboard.add_text_field(None, tick_symbol,((3 * ppd, 3 * ppd)),(0,0),(0, 0, 0), (0,1,0), auto_draw = True, font ='Arial Unicode MS' )
             run_accuracy_vec.append(1)
@@ -291,6 +301,7 @@ for run_i in range(runs.shape[0]):
             keyboard.set_field_text("fix", "---")
             #keyboard.add_text_field(None, 'X',((3 * ppd, 3 * ppd)),(0,0),(0, 0, 0), (1, 0, 0), font ='Arial Unicode MS')
             run_accuracy_vec.append(0)
+           
         core.wait(FEEDBACK_TIME, hogCPUperiod= 0.2)
         
 
