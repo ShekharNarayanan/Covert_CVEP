@@ -45,14 +45,15 @@ KEYS = ['r', 'c', 'i', 't', 'h'] # rectangle, circle, inv triangle, triangle, ho
 # Duration parameters
 '''
 Total Duration  = n_runs x (run_wait_time + n_trials x (cue_time + trial_time + feedback_time + response_time + ITI_time))
-=> 4 * (5 + 20*(1 + 20 + 2 + 3 + 2)) = 2260s = 37.66 minutes
+
 '''
 'Run wait time: 5s'
 CUE_TIME = 1#1  #0.8
 TRIAL_TIME = 20 # 10 for overt// dk for covert, 5 reps
 RESPONSE_TIME = 5
-FEEDBACK_TIME = 2#0.5 -->  feedback is blue; cue is green
-ITI_TIME = 2#0.5
+FEEDBACK_TIME = 1#0.5 -->  feedback is blue; cue is green
+ITI_TIME = 1#0.5
+
 # number of trials 
 n_trials = 20
 
@@ -76,15 +77,6 @@ print(sequence_size)
 # chosen code
 code = 'mgold_61_6521_mod'
 
-
-
-
-'flashes should be black and white!! '
-'every letter could be a different letter'
-'start the lsl recorder click the tick option, where its saved on the right, other deets are obvious then press start'
-
-'first start this script, press start on lsl, then start the task'
-'for log, we need to know exactly what letter was being displed -- check the run function'
 #---------------------------------------------------------------
 # Setup
 #---------------------------------------------------------------
@@ -98,7 +90,6 @@ x_pos = -SCREEN_SIZE[0] / 2 + STT_WIDTH / 2 * ppd
 y_pos = SCREEN_SIZE[1] / 2 - STT_HEIGHT / 2 * ppd
 images = ["images_size_inc/black.png", "images_size_inc/white.png"]
 
-'stt image should be there constantly'
 stt_image = keyboard.image_selector("stt", (STT_WIDTH * ppd, STT_HEIGHT * ppd), (x_pos, y_pos), images) 
 # print(stt_image['stt'][1])
 
@@ -167,7 +158,7 @@ print('codes logged')
 keyboard.set_field_text("text", "")
 keyboard.set_field_text("text", "Press button to start.")
 print("Press button to start.")
-event.waitKeys()
+event.waitKeys(keyList=["c"])
 
 print("Starting.")
 # Start experiment
@@ -184,24 +175,24 @@ run_5 = np.random.permutation(run_4)
 # concatenating all runs (helps with indexing in the loop below)
 runs = np.vstack((run_1,run_2,run_3, run_4,run_5))
 
-
 #  loop through runs
 for run_i in range(runs.shape[0]): 
+    #start of run
+    keyboard.log(marker = ["visual","cmd","starting_run",json.dumps(1+run_i)])
+    keyboard.set_field_text("text", "Starting...")
+    core.wait(5, hogCPUperiod= 0.2)
+    keyboard.set_field_text("text", "")
           
     run_current = runs[run_i,:]
     run_accuracy_vec = [] # % of correctly counted target occurrences in a run
 
-    # Targets in trial
+    # Targets on cued sides in the current run
     targs_left, targs_right = keyboard.targets_in_trial(n_trials=n_trials, min_targets = min_targets, max_targets=max_targets)
 
-    # Cue start of run
-    keyboard.set_field_text("text", "Starting...")
-    core.wait(5, hogCPUperiod= 0.2)
-    keyboard.set_field_text("text", "") 
-    
-    
     for i_trial in range(n_trials):
-
+        
+        # start_trial
+        keyboard.log(marker = ["visual","cmd","start_trial",json.dumps(1+i_trial)])
 
         # Choosing which side will be attended 
         if run_current[i_trial] == 0:   
@@ -211,13 +202,17 @@ for run_i in range(runs.shape[0]):
         else:
             cued_side = 'RIGHT'
             cue_sym = '>'
-
             targets_in_trial_cued = int(targs_right.pop())
-            
+        keyboard.log(["visual","param","cued_side",json.dumps(cued_side)])   
+        keyboard.log(["visual","param","num_targets_cued",json.dumps(targets_in_trial_cued)]) 
+
         # targets in non_cued_side
         targets_in_trial_non_cued =  random.randint(min_targets, max_targets)
         while targets_in_trial_non_cued == targets_in_trial_cued:
             targets_in_trial_non_cued = random.randint(min_targets, max_targets)
+            
+        #logging non_cued info
+        keyboard.log(["visual","param","num_targets_non_cued",json.dumps(targets_in_trial_non_cued)])
             
         print('targets in this trial',targets_in_trial_cued)# keyboard.set_field_text("text", "")
         print('SIDE',cued_side)
@@ -231,23 +226,27 @@ for run_i in range(runs.shape[0]):
                                                            targets_in_trial_cued = targets_in_trial_cued, 
                                                            targets_in_trial_non_cued = targets_in_trial_non_cued)
                                                            
-        print(cued_sq)
         
-        print('cued_sq',cued_sq[1])
+        # logging sequence info
+        keyboard.log(["visual","param","cued_sequence",json.dumps(cued_sq.tolist())])
+        keyboard.log(["visual","param","non_cued_sequence",json.dumps(non_cued_sq.tolist())])
+        
+        # Making Key_Sequence var to use later
         Key_Sequence['cued_sequence'] = cued_sq
         Key_Sequence['non_cued_sequence'] = non_cued_sq
         
-        
 
-        'introduce a cue time'
-        'make the dictionary content more efficient-- all has to be done within a frame 16.67 ms'
-        'be careful of the time in the log, histogram of the time the response is logged'
-        'especially relevent because of the neural responses associated to short and long flashes might be shifted'
-        
         # Cue
+        #cue start
+        keyboard.log(marker = ["visual","cmd","start_cue", json.dumps(cue_sym)])
+        
         keyboard.set_field_text("fix", cue_sym)
         keyboard.window.flip()
         core.wait(CUE_TIME, hogCPUperiod= 0.2)
+        
+        #cue s
+        keyboard.log(marker = ["visual","cmd","stop_cue",""])
+        
         
         # Fixation
         keyboard.set_field_text("fix", "+")
@@ -259,8 +258,8 @@ for run_i in range(runs.shape[0]):
                      letter_change_time_msec = letter_change_time_msec, 
                      FR = FR,
                      duration = TRIAL_TIME, 
-                     start_marker=["visual", "cmd", "start_trial", json.dumps(1+i_trial)], 
-                     stop_marker=["visual", "cmd", "stop_trial", json.dumps(1+i_trial)], 
+                     start_marker=["visual", "cmd", "start_stimulus", json.dumps(1+i_trial)], 
+                     stop_marker=["visual", "cmd", "stop_stimulus", json.dumps(1+i_trial)], 
                      cued_side = cued_side)
 
         # Target Count Confirmation
@@ -269,28 +268,34 @@ for run_i in range(runs.shape[0]):
         
         # Wait response
         response = ''
-        is_completed = False
-        text = visual.TextStim(keyboard.window, text=response, pos=(0, 0), color=(-1,-1,-1))
+        is_completed = False  
         timer = core.CountdownTimer(RESPONSE_TIME)
+        response = ''
         while not is_completed and timer.getTime() > 0:
-
-            # Get response
-            key = event.waitKeys()
+            #log response start
+            keyboard.log(marker = ["visual","cmd","start_response",""])            
+            key = event.waitKeys(maxWait = RESPONSE_TIME, keyList=["return", "backspace", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "num_1", "num_2", "num_3", "num_4", "num_5", "num_6", "num_7", "num_8", "num_9", "num_0"])
+            
+            if key is None:
+                response = '-'
+                break
             if 'return' in key:
-                is_completed = True
-            elif 'space' in key:
-                response += " "
+                break
             elif 'backspace' in key:
                 response = response[:-1]
+            elif "num_" in key[-1]:
+                response += key[-1][-1]
             else:
                 response += key[-1]
-        
+                
+       
+    
             # Show response
-            text.text = response
-            text.draw()
-            keyboard.window.flip()
+            keyboard.set_field_text("fix", response)
 
+        
         print("response is:", response)
+        keyboard.log(marker = ["visual","cmd","stop_response",json.dumps(response)])
         
         # Present feedback
         if response == str(targets_in_trial_cued):
@@ -301,45 +306,41 @@ for run_i in range(runs.shape[0]):
             keyboard.set_field_text("fix", "---")
             #keyboard.add_text_field(None, 'X',((3 * ppd, 3 * ppd)),(0,0),(0, 0, 0), (1, 0, 0), font ='Arial Unicode MS')
             run_accuracy_vec.append(0)
-           
+        
+        #feedback start
+        keyboard.log(marker = ["visual","cmd","start_feedback",""])
         core.wait(FEEDBACK_TIME, hogCPUperiod= 0.2)
-        
+        keyboard.log(marker = ["visual","cmd","stop_feedback",""])
 
-        log_dict_trial = dict()       
-        # 'make the keys conventional-- similar format' 
-        log_dict_trial['run_and_trial'] = [run_i, i_trial]
-        log_dict_trial['cued_sequence'] = Key_Sequence['cued_sequence'].tolist()
-        log_dict_trial['non_cued_sequence'] = Key_Sequence['non_cued_sequence'].tolist()
-        log_dict_trial['cued_side'] = cued_side
-        log_dict_trial['target_count'] = targets_in_trial_cued
-        log_dict_trial['key_pressed'] = key_pressed
-        
-        keyboard.log(["trial_information","","",json.dumps(log_dict_trial)])
 
         # Inter-trial time
         if ITI_TIME > 0:
             keyboard.set_field_text("fix", "+")
+            
+            #start ITI
             keyboard.run(FR = FR, Keys=Key_Sequence, All_Images = All_Images, codes = highlights, duration =ITI_TIME, 
                 start_marker=["visual", "cmd", "start_intertrial", json.dumps(1+i_trial)], 
                 stop_marker=["visual", "cmd", "stop_intertrial", json.dumps(1+i_trial)])
+            
+        keyboard.log(marker = ["visual","cmd","stop_trial",json.dumps(1+i_trial)])
+    keyboard.log(marker = ["visual","cmd","stop_run",json.dumps(1+run_i)])
 
     # Present performance
     run_acc_perc = (np.array(run_accuracy_vec).sum()/len(run_accuracy_vec))*100 
-    keyboard.log(["run accuracy %", "", "", json.dumps(run_acc_perc)])
+    keyboard.log(["visual", "param", "run_accuracy", json.dumps(run_acc_perc)])
     if run_acc_perc<=50:
         color = (1, 0, 0)
     elif run_acc_perc>50 and run_acc_perc<75:
         color = (1.0, 0.647, 0.0)
     else:
         color = (0, 1, 0)
-      
-    if run_i != (runs.shape[0]-1):        
-        keyboard.set_field_text("fix", f'{run_acc_perc:.0f}%') 
-        keyboard.set_field_text("text", "Press any key to start the next run :)")  
-        event.waitKeys()
-        keyboard.set_field_text("fix", "+") 
-        keyboard.set_field_text("text", "") 
-    # else:
+       
+    keyboard.set_field_text("fix", f'{run_acc_perc:.0f}%') 
+    keyboard.set_field_text("text", "Press any key to start the next run")  
+    event.waitKeys(keyList=["c"])
+    keyboard.set_field_text("fix", "+") 
+    keyboard.set_field_text("text", "") 
+    
 
 
 # Stop experiment
