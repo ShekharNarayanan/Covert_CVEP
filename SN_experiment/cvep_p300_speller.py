@@ -257,12 +257,10 @@ class Keyboard(object):
         #(1/60 hz is 16.67 ms, dividing letter change time/refresh rate tells us after how many frames the letter should be changed)
         # In case of CVEP, code presentation rate is the same as refresh rate, i.e 1 bit = 1 frame.
         # After a certain number of frames, the letter flashing on the screen will change
+
+        change_frames = int(letter_change_time_msec * FR)
         
-       
-        frame_change_time_msec  = (1/FR) 
-        
-        change_frames = int(np.round((letter_change_time_msec/ frame_change_time_msec)))
-        print('change frame before loop',change_frames)
+        # print('change frame before loop',change_frames)
    
         # Set number of frames
         if duration is None:
@@ -271,29 +269,24 @@ class Keyboard(object):
             
         else:
             
-            n_frames = int(duration * 60)#self.get_framerate())
+            n_frames = int(duration * FR)#self.get_framerate())
             
-
-        # Send start marker
-        self.log(start_marker, on_flip=True)
-        
         # Accessing all the codes
         code_left = codes['LEFT']
         code_right = codes['RIGHT']
-        
+        code_stt = codes["stt"]
+ 
         for i in range(len(All_Images)):
             if i==0:
                 stt_image  = All_Images[0]
                 stt_image['stt'][0].setAutoDraw(False)
                 
-                
-                
-            # .setAutoDraw(False)
+        # Send start marker
+        self.log(start_marker, on_flip=True)
+
         # Loop frame flips
         for i in range(n_frames): 
-            print('change frame is', change_frames)
 
-            
             # Check quiting
             if i % 60 == 0:
                 if self.is_quit():
@@ -304,32 +297,33 @@ class Keyboard(object):
             for name, code in codes.items(): 
 
                 if name == 'stt':
-                    'set autodraw false here'
-                    # stt_image["stt"].setAutoDraw(True)
-                    stt_image["stt"][code[i % len(code)]].draw()#[code_stt[i % len(code)]].draw()
+
+                    stt_image["stt"][code_stt[i % len(code_stt)]].draw()#
     
             if cued_side == 'LEFT' :            
-                'possible: nothing happens on the non attending side'
-                if (i % (2*change_frames)) < change_frames: 
+
+                if (i % (2*change_frames)) < change_frames:
+                    
                     rem1 = i % (2*change_frames)
-                    # print(int((i-rem1)/change_frames))
-                    
-                    
+
                     lkey_chosen = cued_sequence[int((i-rem1)/change_frames)]  # left side will have the cued letter sequence
                     rkey_chosen = non_cued_sequence[int((i-rem1)/change_frames)]
-                    # print('lkey',lkey_chosen)
                     
-                    # both sides flash
+                    
+                    # print('lkey',rkey_chosen)
+                    
+                    # both sides flash option
                     # Dict_Images_left[lkey_chosen][lkey_chosen][code_left[i % len(code_left)]].draw()
                     # Dict_Images_right[rkey_chosen][rkey_chosen][code_right[i % len(code_right)]].draw()
                     
                     # other side does not flash option
                     # send keys to the log here 
-                    self.log(["Left_and_Right_symbols", "","", ""], [key_dict[lkey_chosen], key_dict[rkey_chosen]])
+                    # shapes_chosen = [key_dict[lkey_chosen], key_dict[rkey_chosen]] # mapping letters to shapes
+                    self.log(["Left_and_Right_symbols", "","", json.dumps([key_dict[lkey_chosen], key_dict[rkey_chosen]])])
                     
                     Dict_Images_left[lkey_chosen][lkey_chosen][code_left[i % len(code_left)]].draw()                 
                     Dict_Images_right[rkey_chosen][rkey_chosen][0].draw()
-
+                    
                 else:
                     rem2 = i%change_frames
                     lkey_chosen = cued_sequence[int((i  - rem2)/change_frames)] # left side will have the cued letter sequence
@@ -339,50 +333,50 @@ class Keyboard(object):
                     # Dict_Images_left[lkey_chosen][lkey_chosen][code_left[i % len(code_left)]].draw()
                     # Dict_Images_right[rkey_chosen][rkey_chosen][code_right[i % len(code_right)]].draw()
                     
-                    # send keys to the log here 
-                    self.log(["Left_and_Right_symbols", "","", ""], [key_dict[lkey_chosen], key_dict[rkey_chosen]])
-                    # other side does not flash option       
+                    # other side does not flash option     
+                    self.log(["Left_and_Right_symbols", "","", json.dumps([key_dict[lkey_chosen], key_dict[rkey_chosen]])])
                     Dict_Images_left[lkey_chosen][lkey_chosen][code_left[i % len(code_left)]].draw()                 
                     Dict_Images_right[rkey_chosen][rkey_chosen][0].draw()
     
             elif cued_side == 'RIGHT' : 
                 
                 if (i % (2*change_frames)) < change_frames: 
-                    rem1 = i % (2*change_frames)
+                
+                    rem1 = i%change_frames
                     lkey_chosen = non_cued_sequence[int((i-rem1)/change_frames)]
                     rkey_chosen = cued_sequence[int((i-rem1)/change_frames)] # right side will have the cued letter sequence
                     
-                    # send keys to the log here 
-                    self.log(["Left_and_Right_symbols", "","", ""], [key_dict[lkey_chosen], key_dict[rkey_chosen]])
-                    # other side does not flash option                        
-                    Dict_Images_right[rkey_chosen][rkey_chosen][code_right[i % len(code_right)]].draw()
-                    Dict_Images_left[lkey_chosen][lkey_chosen][0].draw() 
-                    
                     # both sides flash option     
                     # Dict_Images_left[lkey_chosen][lkey_chosen][code_left[i % len(code_left)]].draw()                  
-                    # Dict_Images_right[rkey_chosen][rkey_chosen][code_right[i % len(code_right)]].draw()   
-                
+                    # Dict_Images_right[rkey_chosen][rkey_chosen][code_right[i % len(code_right)]].draw()
+                    
+                    # other side does not flash option 
+                    self.log(["Left_and_Right_symbols", "","", json.dumps([key_dict[lkey_chosen], key_dict[rkey_chosen]])])                                           
+                    Dict_Images_right[rkey_chosen][rkey_chosen][code_right[i % len(code_right)]].draw()
+                    Dict_Images_left[lkey_chosen][lkey_chosen][0].draw() 
+
                 else:
                     rem2 = i%change_frames
                     lkey_chosen = non_cued_sequence[int((i  - rem2)/change_frames)]
                     rkey_chosen = cued_sequence[int((i  - rem2)/change_frames)]  # right side will have the cued letter sequence
                     
-                    # send keys to the log here 
-                    self.log(["Left_and_Right_symbols", "","", ""], [key_dict[lkey_chosen], key_dict[rkey_chosen]])
-                     # other side does not flash option                        
-                    Dict_Images_right[rkey_chosen][rkey_chosen][code_right[i % len(code_right)]].draw()
-                    Dict_Images_left[lkey_chosen][lkey_chosen][0].draw() 
-                    
                     # both sides flash option     
                     # Dict_Images_left[lkey_chosen][lkey_chosen][code_left[i % len(code_left)]].draw()                  
                     # Dict_Images_right[rkey_chosen][rkey_chosen][code_right[i % len(code_right)]].draw() 
+                    
+                    #other side does not flash option
+                    self.log(["Left_and_Right_symbols", "","", json.dumps([key_dict[lkey_chosen], key_dict[rkey_chosen]])])                        
+                    Dict_Images_right[rkey_chosen][rkey_chosen][code_right[i % len(code_right)]].draw()
+                    Dict_Images_left[lkey_chosen][lkey_chosen][0].draw() 
+                    
+
     
             self.window.flip()  
-            
-        # self.add_text_field(None, "",((3 * ppd, 3 * ppd)),(0,0),(0, 0, 0), (-1, -1, -1), auto_draw = True)
 
         # Send stop markers
         self.log(stop_marker)
+        
+        # self.add_text_field(None, "",((3 * ppd, 3 * ppd)),(0,0),(0, 0, 0), (-1, -1, -1), auto_draw = True)
 
         # # Set autoDraw to True to keep app visible
         for i in range(len(All_Images)):
