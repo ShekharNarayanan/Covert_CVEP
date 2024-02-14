@@ -1,7 +1,7 @@
 # Covert_CVEP
 
 # Main Idea
-The aim of this project is to create a **_covert_** code modulated Visual Evoked Potential (cVEP) experimental paradigm for a Brain Computer Interface Speller aimed at helping people with ALS using EEG. 
+The aim of this project is to create a **_covert_** code modulated Visual Evoked Potential (cVEP) experimental paradigm for a Brain Computer Interface Speller aimed at helping people with ALS. 
 It aims to do so by eliminating the need for eye-tracking, since many who suffer from ALS do not have control over muscles responsible for ocular movements.
 
 # Experiment
@@ -13,10 +13,10 @@ Contents:
 
 # Analysis
 Contents:
-1. rCCA_Covert:
-2. Decoding_Covert:
-3. Power_Analysis_Covert:
-4. read_cvep_data_shek: Python code for preprocessing and extracting relevant vectors from raw EEG data.
+1. rCCA_module:
+2. Decoding_module:
+3. Power_Analysis_module:
+4. read_cvep_data: Python code for preprocessing and extracting relevant vectors from raw EEG data.
 
 Libraries used:
 - *Numpy*
