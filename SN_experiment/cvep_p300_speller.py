@@ -4,12 +4,12 @@
 Python implementation of a keyboard for the noise-tagging project.
 """
 '''Modifications @ SN
-- Modified: The keyboard is replaced with just the Y and N keys.
-- Modified: The add_key function (now Image_Selector) is modified to add images on the fly when the code is running.
+- Modified: The keyboard is replaced with 2 classes.
+- Modified: The add_key function (now Image_Selector) is modified to add images on the fly when the run function is called.
 - Modified: The run function can now flash CVEP codes for each key individually 
 - Added: Option to change the angle between the two classes (x-axis) and from the fixation point (y-axis).
 - Added: P300 paradigm works in conjunction with the previous CVEP only setup.
-- Added: Sequence generator function that generates sequences of letters that are flashed on the screen
+- Added: Sequence generator function that generates sequences of shapes that are flashed on the screen
 
 '''
 
