@@ -28,47 +28,57 @@ from copy import deepcopy
 import easygui
 
 
+# paths
+data_path = r"C:\Users\s1081686\Desktop\RA_Project\Scripts\pynt_codes\SN_pilot_data"
+codes_path = r"C:\Users\s1081686\Desktop\RA_Project\Scripts\pynt_codes\SN_experiment\codes_shifted"
 
-path = r"C:\Users\s1081686\Desktop\RA_Project\Scripts\pynt_codes\SN_pilot_data"
-repo = r"C:\Users\s1081686\Desktop\RA_Project\Scripts\pynt_codes\SN_experiment\codes"
-
-subjects = ["pilot"]
+subjects = ["pilot5"]
 ses = "ses-S001"
 
 skip_done = True
 
-## IMPORTANT PARAMETERS 
-fs = 240  # target EEG sampling frequency (multiple of stimulus presentation rate)
-fr = 60  # monitor refresh rate
+# presentation params 
+fs = 120  # target EEG sampling frequency (multiple of stimulus presentation rate)
+fr = 120
 pr = 60  # stimulus presentation rate
 
+# run params
+overt_runs = 1
+covert_runs = 4
 
-# cvep_n_runs = 4 (irrelevant for shek pilot)
-cvep_l_freq = 2
-cvep_h_freq = 35# originally 35 
+# filtering params
+cvep_l_freq = 1
+cvep_h_freq = 40# originally 35 
+notch = 50
 
-# trial_time 
-trial_time = 10.5 # in seconds
+# trial time 
+trial_time = 20 # in seconds
 
-# for shek_pilot
-key_words = ['covert','overt']
+# conditions
+conditions = ['covert','overt']
 
 for subject in subjects:
     print("*" * 15) # only one subject
           
-    for i_word in range(len(key_words)):
+    for i_condition in range(len(conditions)):
         
-        print("starting data extraction for:",key_words[i_word])
-        labels=[] 
-        eeg =[]        
+        print("starting data extraction for:",conditions[i_condition])
+        labels_all=[] 
+        eeg = []    
         
-        for i_run in range(2): # for shek_pilot you have 2 covert runs and 2 overt runs, hence the range is set to 2
+        if conditions[i_condition] == 'overt':
+            i_run_range = overt_runs  
+            
+        else:
+            i_run_range = covert_runs
+        
+        for i_run in range(i_run_range): # 
                         
             # Load xdf data into MNE
-            fn = os.path.join(path, "raw", f"sub-{subject}", ses, "eeg", 
-                f"sub-{subject}_{ses}_task-{key_words[i_word]}_run-{1 + i_run:03d}_eeg.xdf")
+            fn = os.path.join(data_path, "raw", f"sub-{subject}", ses, "eeg", 
+                f"sub-{subject}_{ses}_task-{conditions[i_condition]}_run-{1 + i_run:03d}_eeg.xdf")
             
-            print("path is",fn)
+            print("data_path is",fn)
             
             
             streams = pyxdf.resolve_streams(fn)
@@ -80,6 +90,10 @@ for subject in subjects:
             # Adjust marker channel data
             raw._data[0, :] -= np.min(raw._data[0, :])
             raw._data[0, raw._data[0, :] > 0] = 1
+            raw._data[0, :] = np.logical_and(raw._data[0, :], np.roll(raw._data[0, :], -1)).astype(raw._data[0, :].dtype)
+            events = mne.find_events(raw, stim_channel="Trig1")
+            
+            print("events found:", len(events))
 
             # Filtering
             raw = raw.filter(l_freq=cvep_l_freq, h_freq=cvep_h_freq, 
@@ -87,7 +101,6 @@ for subject in subjects:
                 iir_params=dict(order=6, ftype='butter'))
                                
             # adding a notch filter
-            notch = 50
             raw.notch_filter(freqs=np.arange(notch,raw.info["sfreq"]/2,notch))
             
             
@@ -135,66 +148,76 @@ for subject in subjects:
             # plt.show()                          
 
             # Read events
-            events = mne.find_events(raw, stim_channel="Trig1")    
+            # events = mne.find_events(raw, stim_channel="Trig1")
+            
+            # Extract labels and conditions from marker stream
+            streams = pyxdf.load_xdf(fn)[0]
+            names = [stream["info"]["name"][0] for stream in streams]
+            marker_stream = streams[names.index("KeyboardMarkerStream")]
+                             
+            labels = [marker[3].lower().strip('""') == "right" 
+            for marker in marker_stream["time_series"]
+            if marker[2] == "cued_side"]
+
             
             'Setting up and fitting ICA'
             
-            picks_eeg = mne.pick_types(raw.info, meg = False, eeg = True, eog = False, stim = False, exclude = 'bads')            
-            ica_obj = mne.preprocessing.ICA(n_components = 32,   
-                                            method =  'fastica',                                          
-                                            max_iter = 'auto',
-                                            random_state = 97 
-                                            # fit_params = dict(extended = True)
-                                            )
+            # picks_eeg = mne.pick_types(raw.info, meg = False, eeg = True, eog = False, stim = False, exclude = 'bads')            
+            # ica_obj = mne.preprocessing.ICA(n_components = 64,   
+            #                                 method =  'fastica',                                          
+            #                                 max_iter = 'auto',
+            #                                 random_state = 97 
+            #                                 # fit_params = dict(extended = True)
+            #                                 )
             
-            # Setting montage for biosemi (needed for topoplots)
+            # # Setting montage for biosemi (needed for topoplots)
             
-            # Read cap file
-            path_capfile = r"C:\Users\s1081686\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\pyntbci\capfiles" 
-            capfile = os.path.join(path_capfile, "biosemi32.loc")
-            with open(capfile, "r") as fid:
-                channels = []
-                for line in fid.readlines():
-                    channels.append(line.split("\t")[-1].strip())
+            # # Read cap file
+            # path_capfile = r"C:\Users\s1081686\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\pyntbci\capfiles" 
+            # capfile = os.path.join(path_capfile, "biosemi64.loc")
+            # with open(capfile, "r") as fid:
+            #     channels = []
+            #     for line in fid.readlines():
+            #         channels.append(line.split("\t")[-1].strip())
             
-            chan_names_old = raw.info.ch_names[1:33]
+            # chan_names_old = raw.info.ch_names[1:63]
             
-            mapping = {}
+            # mapping = {}
             
-            for key, channel in zip(chan_names_old, channels):
-                mapping[key] = channel
+            # for key, channel in zip(chan_names_old, channels):
+            #     mapping[key] = channel
             
                 
-            mne.rename_channels(raw.info,mapping = mapping)
-            # montage = mne.channels.make_standard_montage(kind = 'biosemi32')
-            montage = mne.channels.read_custom_montage(fname = capfile)
-            print(montage)
-            raw.set_montage(montage)
+            # mne.rename_channels(raw.info,mapping = mapping)
+            # # montage = mne.channels.make_standard_montage(kind = 'biosemi32')
+            # montage = mne.channels.read_custom_montage(fname = capfile)
+            # print(montage)
+            # raw.set_montage(montage)
             
-            ica_obj.fit(raw, picks = picks_eeg)    # fitting the ica
-            ica =  ica_obj.get_sources(raw).get_data()
-            print("shape of ica matrix",ica.shape)
+            # ica_obj.fit(raw, picks = picks_eeg)    # fitting the ica
+            # ica =  ica_obj.get_sources(raw).get_data()
+            # print("shape of ica matrix",ica.shape)
             
-            # plotting ICA results
-            ica_obj.plot_sources(raw)
-            ica_obj.plot_components(picks = None, show = True, inst = raw)# plotting individual components
+            # # plotting ICA results
+            # ica_obj.plot_sources(raw)
+            # ica_obj.plot_components(picks = None, show = True, inst = raw)# what does this actually show????0
             
             
             
-            # Applying ICA results to raw data and removing noisy components
-            exclude_vec_str = easygui.enterbox("Enter the component(s) you would like to exclude please (1 2 3 ..) ")
-            vector_list = [int(x) for x in exclude_vec_str.split()]
-            ica_obj.exclude = vector_list
-            ica_obj.apply(raw) # go back to EEG space/ apply the ICA changes        
+            # # Applying ICA results to raw data and removing noisy components
+            # exclude_vec_str = easygui.enterbox("Enter the component(s) you would like to exclude please (1 2 3 ..) ")
+            # vector_list = [int(x) for x in exclude_vec_str.split()]
+            # ica_obj.exclude = vector_list
+            # ica_obj.apply(raw) # go back to EEG space????         
 
             # Slicing
             # N.B. Add baseline to capture filtering artefacts of 
             # downsampling (removed later)
             # N.B. Use largest trialtime (samples are cut away later)
-            baseline = 0.5
-            epo = mne.Epochs(raw, events=events, tmin=-baseline, 
+            # baseline = 0.5
+            epo = mne.Epochs(raw, events=events, tmin=-0.5, 
                 tmax=trial_time, baseline= None, picks="eeg", 
-                preload=True, reject_by_annotation= True)           
+                preload=True)           
             
             # Resampling
             # N.B. Downsampling is done after slicing to maintain accurate 
@@ -202,65 +225,55 @@ for subject in subjects:
             epo = epo.resample(sfreq=fs)
             
             # Collecting dropped epochs/trials
-            dropped_eps = [n for n, dl in enumerate(epo.drop_log) if len(dl)] 
+            # dropped_eps = [n for n, dl in enumerate(epo.drop_log) if len(dl)] 
 
-            # Add to database (trials channels samples)            
-            baseline_idx = int(baseline * epo.info["sfreq"])           
-            eeg.append(epo.get_data()[:, :, baseline_idx:])
+            eeg.append(epo.get_data(tmin=0, tmax=trial_time))
+            labels_all.append(labels)
 
-            # Extract labels and conditions from marker stream
-            streams = pyxdf.load_xdf(fn)[0]
-            names = [stream["info"]["name"][0] for stream in streams]
-
-            marker_stream = streams[names.index("KeyboardMarkerStream")]
-            
-                                
-            labels.extend([int(marker[3]) 
-                for marker in marker_stream["time_series"] 
-                if marker[2] == "target"])
-            
             
             # Removing trials with bad data from labels                      
-            labels = [label for i, label in enumerate(labels) if i not in dropped_eps]            
+            # labels = [label for i, label in enumerate(labels) if i not in dropped_eps]            
 
-        # Extract data (Data should be extracted per condition)
-        X = np.concatenate(eeg, axis=0).astype("float32")  # trials channels samples
-        y = np.array(labels).astype("uint8")
+        # Extract data 
+        if i_run_range > 1:            
+            X = np.squeeze(np.concatenate(eeg, axis=0)).astype("float32")  # trials channels samples
+            y = np.concatenate(labels_all, axis=0).astype("uint8")
+            
+        else:
+            X = np.squeeze(np.array(eeg)).astype("float32") 
+            y = np.array(labels).astype("uint8")
+
+        print("size of X and y ",[X.shape,y.shape])
+        # Loop conditions-- hardcoding the value to the code used 
+        code_used ='mgold_61_6521_mod'#
         
-        print("size of X and y after epoch removal",[X.shape,y.shape])
+        # limiting the duration of data correctly
+        X = X[:, :, :int(trial_time * fs)]
         
+        # Load codes
+        fn = os.path.join(codes_path, f"{code_used}.npz").replace('\\','/')
+        
+        V = np.load(fn)["codes"]
+        
+        V = np.repeat(V, int(fs / pr), axis=0).astype("uint8")
+        
+        print("Condition:", code_used)
+        print("\tX:", X.shape)
+        print("\ty:", y.shape)
+        print("\tV:", V.shape)
 
-       # Loop conditions-- hardcoding the value to the code used 
-        conditions = ['mgold_61_6521'] * X.shape[0]         
-
-        for condition in set(conditions):
-            
-            #Select trials
-            idx = np.array([x == condition for x in conditions]).astype("bool_")
-            _X = X[idx, :, :].astype("float32")
-            _y = y[idx].astype("uint8")
-
-            # Set correct trial length
-            if "mseq" in condition or "gold" in condition:
-                _X = _X[:, :, :int(trial_time * fs)]
-                
-                
-            # Load codes
-            fn = os.path.join(repo, f"{condition}.npz").replace('\\','/')
-            
-            V = np.load(fn)["codes"]
-            
-            V = np.repeat(V, int(fs / pr), axis=0).astype("uint8")
-            
-            print("Condition:", condition)
-            print("\tX:", _X.shape)
-            print("\ty:", _y.shape)
-            print("\tV:", V.shape)
-
-            # Save data
-            cvep = f"{subject}_cvep_{key_words[i_word]}_{condition}_40T_ICA.npz"
-            fn = os.path.join(path, "derivatives", subject, cvep)
-            np.savez(fn, X=_X, y=_y, V=V, fs=fs)
+        # Save data
+        cvep = f"{subject}_cvep_{conditions[i_condition]}_{code_used}.npz"
+        save_path = os.path.join(data_path, "derivatives", subject).replace('\\','/')
+        if not os.path.isdir(save_path):
+            os.makedirs(save_path)
+        
+        fn = os.path.join(save_path, cvep).replace('\\','/')
+        np.savez(fn, X=X, y=y, V=V, fs=fs)
+        
+        print(f"data saved for {subject}")
+        
+    
             
     
             
