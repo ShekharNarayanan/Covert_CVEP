@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-@author: Jordy Thielen (jordy.thielen@donders.ru.nl)
+@author: Jordy Thielen (jordy.thielen@donders.ru.nl), Shekhar Narayanan (shekharnarayanan833@gmail.com)
 
 Read LSL data
 Modifications @ SN
-1. Hardcoded the "conditions" vector for the codes used in the pilot
+1. Removed: the segment with conditions for multiple codes
 2. Added: A notch filter
 3. Added: Option to view and remove bad epochs from data
 4. Added: Option to remove bad channels 
@@ -32,10 +32,8 @@ import easygui
 data_path = r"C:\Users\s1081686\Desktop\RA_Project\Scripts\pynt_codes\SN_pilot_data"
 codes_path = r"C:\Users\s1081686\Desktop\RA_Project\Scripts\pynt_codes\SN_experiment\codes_shifted"
 
-subjects = ["pilot5"]
+subjects = ["pilot5"] # enter participant ID or pilot number
 ses = "ses-S001"
-
-skip_done = True
 
 # presentation params 
 fs = 120  # target EEG sampling frequency (multiple of stimulus presentation rate)
@@ -48,7 +46,7 @@ covert_runs = 4
 
 # filtering params
 cvep_l_freq = 1
-cvep_h_freq = 40# originally 35 
+cvep_h_freq = 40 
 notch = 50
 
 # trial time 
@@ -58,7 +56,7 @@ trial_time = 20 # in seconds
 conditions = ['covert','overt']
 
 for subject in subjects:
-    print("*" * 15) # only one subject
+    print("*" * 15) 
           
     for i_condition in range(len(conditions)):
         
@@ -79,8 +77,7 @@ for subject in subjects:
                 f"sub-{subject}_{ses}_task-{conditions[i_condition]}_run-{1 + i_run:03d}_eeg.xdf")
             
             print("data_path is",fn)
-            
-            
+
             streams = pyxdf.resolve_streams(fn)
             names = [stream["name"] for stream in streams]
 
@@ -230,7 +227,6 @@ for subject in subjects:
             eeg.append(epo.get_data(tmin=0, tmax=trial_time))
             labels_all.append(labels)
 
-            
             # Removing trials with bad data from labels                      
             # labels = [label for i, label in enumerate(labels) if i not in dropped_eps]            
 
@@ -244,20 +240,20 @@ for subject in subjects:
             y = np.array(labels).astype("uint8")
 
         print("size of X and y ",[X.shape,y.shape])
-        # Loop conditions-- hardcoding the value to the code used 
-        code_used ='mgold_61_6521_mod'#
         
         # limiting the duration of data correctly
         X = X[:, :, :int(trial_time * fs)]
         
         # Load codes
+        code_used ='mgold_61_6521_mod'
+        
         fn = os.path.join(codes_path, f"{code_used}.npz").replace('\\','/')
         
         V = np.load(fn)["codes"]
         
         V = np.repeat(V, int(fs / pr), axis=0).astype("uint8")
         
-        print("Condition:", code_used)
+        print("Code used:", code_used)
         print("\tX:", X.shape)
         print("\ty:", y.shape)
         print("\tV:", V.shape)
@@ -265,6 +261,7 @@ for subject in subjects:
         # Save data
         cvep = f"{subject}_cvep_{conditions[i_condition]}_{code_used}.npz"
         save_path = os.path.join(data_path, "derivatives", subject).replace('\\','/')
+        
         if not os.path.isdir(save_path):
             os.makedirs(save_path)
         
