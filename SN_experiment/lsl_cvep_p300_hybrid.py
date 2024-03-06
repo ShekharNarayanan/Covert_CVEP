@@ -113,10 +113,19 @@ All_Images_Right = {}
 for key_i in range(len(KEYS)):
     key = KEYS[key_i]      
     images = [f"images_size_inc/{KEYS[key_i]}_{color}.png" for color in KEY_COLORS]
-            
-    All_Images_Left[key] = keyboard.image_selector(key, (KEY_WIDTH * ppd, KEY_HEIGHT * ppd), (x_pos_left,y_pos_both), images) 
-    All_Images_Right[key] = keyboard.image_selector(key, (KEY_WIDTH * ppd, KEY_HEIGHT * ppd), (x_pos_right,y_pos_both), images) 
-
+    
+    if key_i == (len(KEYS) - 3): # inverted triangle is drawn by default on the left
+        All_Images_Left[key] = keyboard.image_selector(key, (KEY_WIDTH * ppd, KEY_HEIGHT * ppd), (x_pos_left,y_pos_both), images, auto_draw = True) 
+        All_Images_Right[key] = keyboard.image_selector(key, (KEY_WIDTH * ppd, KEY_HEIGHT * ppd), (x_pos_right,y_pos_both), images)
+         
+    elif key_i == (len(KEYS) - 2): # triangle is drawn by default on the right
+        All_Images_Left[key] = keyboard.image_selector(key, (KEY_WIDTH * ppd, KEY_HEIGHT * ppd), (x_pos_left,y_pos_both), images) 
+        All_Images_Right[key] = keyboard.image_selector(key, (KEY_WIDTH * ppd, KEY_HEIGHT * ppd), (x_pos_right,y_pos_both), images, auto_draw = True)
+    
+    else:
+        All_Images_Left[key] = keyboard.image_selector(key, (KEY_WIDTH * ppd, KEY_HEIGHT * ppd), (x_pos_left,y_pos_both), images) 
+        All_Images_Right[key] = keyboard.image_selector(key, (KEY_WIDTH * ppd, KEY_HEIGHT * ppd), (x_pos_right,y_pos_both), images)
+       
 All_Images = [stt_image,All_Images_Left,All_Images_Right]
 
 
