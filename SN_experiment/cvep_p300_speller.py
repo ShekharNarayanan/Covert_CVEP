@@ -124,7 +124,7 @@ class Keyboard(object):
         return img
  
 
-    def image_selector(self, name, size, pos , images=["white.png", "blue.png"]):
+    def image_selector(self, name, size, pos , images=["white.png", "blue.png"], auto_draw = False):
         """
         Add a key to the keyboard.
 
@@ -158,7 +158,7 @@ class Keyboard(object):
 
             images_out[name].append(image_stim)
             
-        if name == 'stt':
+        if auto_draw:
             images_out[name][0].setAutoDraw(True)
             
             # self.window.flip()
@@ -275,11 +275,12 @@ class Keyboard(object):
         code_left = codes['LEFT']
         code_right = codes['RIGHT']
         code_stt = codes["stt"]
- 
-        for i in range(len(All_Images)):
-            if i==0:
-                stt_image  = All_Images[0]
-                stt_image['stt'][0].setAutoDraw(False)
+
+        # disabling autodraw before code presentation
+        stt_image['stt'][0].setAutoDraw(False)
+        Dict_Images_left['i']['i'][0].setAutoDraw(False)
+        Dict_Images_right['t']['t'][0].setAutoDraw(False)
+
                 
         # Send start marker
         self.log(start_marker, on_flip=True)
@@ -379,10 +380,10 @@ class Keyboard(object):
         # self.add_text_field(None, "",((3 * ppd, 3 * ppd)),(0,0),(0, 0, 0), (-1, -1, -1), auto_draw = True)
 
         # # Set autoDraw to True to keep app visible
-        for i in range(len(All_Images)):
-            if i==0:
-                stt_image  = All_Images[0]
-                stt_image['stt'][0].setAutoDraw(True)
+        stt_image['stt'][0].setAutoDraw(True)
+        Dict_Images_left['i']['i'][0].setAutoDraw(True)
+        Dict_Images_right['t']['t'][0].setAutoDraw(True)
+        
         self.window.flip()
         
     def sequence_generator(self, letter_arr = None, size_letter_arr = None, target_letter= None, targets_in_trial_cued = None, targets_in_trial_non_cued = None, min_target_key_distance = 5):
@@ -489,13 +490,13 @@ class Keyboard(object):
         
         return cued_array, non_cued_array
     
-    def targets_in_trial(self,n_trials,max_targets):
+    def targets_in_trial(self, n_trials, min_targets, max_targets):
         
             size_of_arr = int(np.ceil(n_trials / 2))
 
             while True:
-                array1 = np.random.randint(1, max_targets, size=size_of_arr)
-                array2 = np.random.randint(1, max_targets, size=size_of_arr)
+                array1 = np.random.randint(min_targets, max_targets, size=size_of_arr)
+                array2 = np.random.randint(min_targets, max_targets, size=size_of_arr)
             # The sum of targets within a run on left and right sides should be the equal. 
             # This is done to make sure the number of p300 responses are balanced
                 if np.sum(array1)== np.sum(array2):
