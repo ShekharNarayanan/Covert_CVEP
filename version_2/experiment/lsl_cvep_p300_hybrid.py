@@ -11,7 +11,7 @@ from cvep_p300_speller import Keyboard
 from psychopy import event, core
 import yaml
 import pickle
-# from sequence_generation import sequence_generator, targets_in_trial
+
 
 #---------------------------------------------------------------
 # Parameters
