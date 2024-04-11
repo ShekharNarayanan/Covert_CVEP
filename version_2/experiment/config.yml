@@ -1,6 +1,6 @@
 experimental_params:
   # The n_th participant
-  N_PARTICIPANT: 1 # the lsl script will not run if this parameter is not changed
+  N_PARTICIPANT: -1 # the lsl script will not run if this parameter is not changed
   # Configuration for the experiment setup
   STREAM: True  # stream LSL data
   SCREEN: 0  # change if projecting to another PC 
