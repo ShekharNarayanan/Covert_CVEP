@@ -33,16 +33,11 @@ experimental_params:
     - h # hourglass
 
   # Duration parameters (Total Duration  = n_runs x (run_wait_time + n_trials x (cue_time + trial_time + feedback_time + response_time + ITI_time))
-  # number of runs for covert and overt conditions
-
-  
-
-  # Run wait time: 5s
-  CUE_TIME: 1  # 1  #0.8
-  TRIAL_TIME: 20  # 10 for overt// dk for covert, 5 reps
-  RESPONSE_TIME: 5
-  FEEDBACK_TIME: 1  # 0.5 -->  feedback is blue; cue is green
-  ITI_TIME: 1  # 0.5
+  CUE_TIME: 1  
+  TRIAL_TIME: 20 
+  RESPONSE_TIME: 5 # time given to the participant to enter target count
+  FEEDBACK_TIME: 1  # time for feedback
+  ITI_TIME: 1  # inter trial time
 
   # Number of trials 
   N_TRIALS: 20
