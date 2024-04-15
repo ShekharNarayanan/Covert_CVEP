@@ -8,7 +8,7 @@ experimental_params:
   SCREEN_WIDTH_LAB_PC: 68.58  
   SCREEN_DISTANCE: 60.0
   SCREEN_COLOR: (0, 0, 0)
-  FR: 60  # screen frame rate
+  FR: 120  # screen frame rate
   PR: 60  # codes presentation rate
 
   # Dimensions for various elements on the screen
@@ -18,11 +18,8 @@ experimental_params:
   CIRCLE_WIDTH: 3.0
   CIRCLE_HEIGHT: 3.0
 
-
-  # space between the two circles in visual degrees
-  # Inner edge of left stimuli to inner edge of right stimuli
-  SPACING_X: 4.2
-  ANGLE_FROM_FIXATION: 0
+  SPACING_X: 4.2 # space between the two circles in visual degrees
+  ANGLE_FROM_FIXATION: 0 # vertical angle from the fixation point 
 
   # background color of keys and shapes in sequence
   CIRCLE_COLORS:
