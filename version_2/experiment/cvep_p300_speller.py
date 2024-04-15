@@ -1,17 +1,9 @@
 """
-@author: Jordy Thielen (jordy.thielen@donders.ru.nl), Shekhar Narayanan (SN) (shekharnarayanan833@gmail.com)
+@author: Shekhar Narayanan (SN) (shekharnarayanan833@gmail.com), Jordy Thielen (jordy.thielen@donders.ru.nl)
 
-Python implementation of a keyboard for the noise-tagging project.
+Python implementation for the stimulus paradigm made for the covert c-VEP project.
 """
-'''Modifications @ SN
-- Modified: The keyboard is replaced with just the Y and N keys.
-- Modified: The add_key function (now Image_Selector) is modified to add images on the fly when the code is running.
-- Modified: The run function can now flash CVEP codes for each key individually 
-- Added: Option to change the angle between the two classes (x-axis) and from the fixation point (y-axis).
-- Added: P300 paradigm works in conjunction with the previous CVEP only setup.
-- Added: Sequence generator function that generates sequences of letters that are flashed on the screen
 
-'''
 import json
 import numpy as np
 from psychopy import visual, event, monitors, misc
@@ -93,30 +85,7 @@ class Keyboard(object):
         """
         return int(np.round(self.window.getActualFrameRate()))
     
-    def circular_cropping(self, image_path: str):
-        """
-            Crop the square key images into a circle with a diameter length equal to the length of a side
-            
-            Args:
-                image_path(str):
-                   The path to the image file                                 
-               
-        """ 
-        img = Image.open(image_path)
-        width, height = img.size
-        
-        # Create an alpha mask (circular shape)
-        mask = Image.new('L', (width, height), 0)
-        draw = ImageDraw.Draw(mask)
-        draw.ellipse((0, 0, width, height), fill=200,outline=0)
-
-        # Apply the mask to the image
-        img.putalpha(mask)
     
-               
-        return img
- 
-
     def image_selector(self, name: str, size: tuple, pos, images=["white.png", "blue.png"], auto_draw = False):
         """
         Add circular spaces/ stimulus timing tracker (STT) to the stimulus paradigm
@@ -269,7 +238,6 @@ class Keyboard(object):
             for name, _ in codes.items(): 
 
                 if name == 'stt':
-
                     stt_image["stt"][code_stt[i % len(code_stt)]].draw()
 
             # left side has the cued shape sequence
