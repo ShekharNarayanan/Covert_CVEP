@@ -18,6 +18,9 @@ codes_path = r'C:\Users\s1081686\Desktop\RA_Project\graz_conference\experiment\c
 subjects = [f"pilot{ind}" for ind in range(3,8)] # 5 subjects
 ses = "ses-S001"
 
+# name of the code used
+code ='mgold_61_6521_mod'
+
 # presentation params 
 fs = 120  # target EEG (down)sampling frequency 
 fr = 120  # frame rate of the PC used for stimulus presentation rate
@@ -144,9 +147,6 @@ for i_subject, subject in enumerate(subjects):
         else:
             X = np.squeeze(np.array(eeg)).astype("float32") 
             y = np.array(labels).astype("uint8")
-        
-        # name of the code used
-        code ='mgold_61_6521_mod'
         
         # limiting the duration of data to trial time
         X = X[:, :, :int(trial_time * fs)]
