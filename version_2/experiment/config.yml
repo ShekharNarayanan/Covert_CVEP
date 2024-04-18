@@ -1,6 +1,6 @@
 experimental_params:
   # The n_th participant
-  N_PARTICIPANT: -1 # the lsl script will not run if this parameter is not changed
+  N_PARTICIPANT: 1 # the lsl script will not run if this parameter is not changed
   # Configuration for the experiment setup
   STREAM: True  # stream LSL data
   SCREEN: 0  # change if projecting to another PC 
@@ -10,7 +10,8 @@ experimental_params:
   SCREEN_WIDTH_LAB_PC: 68.58  
   SCREEN_DISTANCE: 60.0
   SCREEN_COLOR: (0, 0, 0)
-  FR: 60  # screen frame rate
+  FR_LAB: 120 # screen frame rate
+  FR_HOME: 60  # screen frame rate
   PR: 60  # codes presentation rate
 
   # Dimensions for various elements on the screen
@@ -43,11 +44,11 @@ experimental_params:
   
 
   # Run wait time: 5s
-  CUE_TIME: 1  # 1  #0.8
-  TRIAL_TIME: 20  # 10 for overt// dk for covert, 5 reps
-  RESPONSE_TIME: 5
-  FEEDBACK_TIME: 1  # 0.5 -->  feedback is blue; cue is green
-  ITI_TIME: 1  # 0.5
+  CUE_TIME: 0  # 1  #0.8
+  TRIAL_TIME: 10 #20 # 10 for overt// dk for covert, 5 reps
+  RESPONSE_TIME: 1
+  FEEDBACK_TIME: 1  #5 
+  ITI_TIME: 0  #1
 
   # Number of trials 
   N_TRIALS: 20
