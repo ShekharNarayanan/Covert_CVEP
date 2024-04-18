@@ -278,39 +278,37 @@ for run_i in range(runs.shape[0]):
         # Target Count Confirmation
         keyboard.set_field_text("fix", "?")
         keyboard.window.flip()  
-        print("c seq", "n cseq", cued_sequence, non_cued_sequence)
-        #TODO: confirm this part Wait response
+        
+        # Wait response
         response = ''
-        is_completed = False  
         timer = core.CountdownTimer(RESPONSE_TIME)
-        response = ''
-        while not is_completed and timer.getTime() > 0:
+        while timer.getTime() > 0:
             #log response start
             keyboard.log(marker = ["visual","cmd","start_response",""])            
-            key = event.waitKeys(maxWait = RESPONSE_TIME, keyList=["return", "backspace", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "num_1", "num_2", "num_3", "num_4", "num_5", "num_6", "num_7", "num_8", "num_9", "num_0"])
+            key = event.getKeys(keyList=["return", "backspace", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "num_1", "num_2", "num_3", "num_4", "num_5", "num_6", "num_7", "num_8", "num_9", "num_0"])
             
-            if key is None:
-                response = '-'
-                break
-            if 'return' in key:
-                break
-            elif 'backspace' in key:
-                response = response[:-1]
-            elif "num_" in key[-1]:
-                response += key[-1][-1]
-            else:
-                response += key[-1]
-       
-    
-            # Show response
-            keyboard.set_field_text("fix", response)
+            if len(key) > 0:
+                if 'return' in key:
+                    break
+                elif 'backspace' in key:
+                    response = response[:-1]
+                elif "num_" in key[-1]:
+                    response += key[-1][-1]
+                else:
+                    response += key[-1]
+                    
+                # Show response
+                keyboard.set_field_text("fix", response)
 
         
         print("response is:", response)
         keyboard.log(marker = ["visual","cmd","stop_response",json.dumps(response)])
         
         # Present feedback
-        if float(response) == targets_in_trial_cued:
+        if response != '':
+            response = float(response)
+            
+        if response == targets_in_trial_cued:
             keyboard.set_field_text("fix", "+++")
             run_accuracy_vec[i_trial] = 1
         else:
