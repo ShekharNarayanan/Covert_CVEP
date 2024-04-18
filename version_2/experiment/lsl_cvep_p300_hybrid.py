@@ -31,12 +31,12 @@ experiment_params = config_data['experimental_params']
 STREAM = experiment_params['STREAM'] # stream LSL data
 SCREEN = experiment_params['SCREEN'] # which screen to use, set to 0 for no projection
 
-# change  HOME to LAB to run script on different monitor specifications, see config file
+# change  'HOME' to 'LAB' to run script on different monitor specifications, see config file
 SCREEN_SIZE = eval(experiment_params['SCREEN_SIZE_HOME_PC'])# resolution of the monitor 
 SCREEN_WIDTH = experiment_params['SCREEN_WIDTH_HOME_PC']  # width of the monitor in cm
 SCREEN_DISTANCE = experiment_params['SCREEN_DISTANCE'] # distance at which the participant is seated
 SCREEN_COLOR = eval(experiment_params['SCREEN_COLOR']) # background color of the screen
-FR = experiment_params['FR']  # screen frame rate
+FR = experiment_params['FR_LAB']  # screen frame rate
 PR = experiment_params['PR']  # codes presentation rate
 
 # height and width of the stimulus timing tracker (STT) on the top left of the screen
@@ -75,17 +75,14 @@ total_frames = int(TRIAL_TIME*FR) # Total frames within a trial
 change_shapes = int(shape_change_time_sec*FR)  # The number of frames after which a new shape will appear inside the circle
 min_target_key_distance = 6*shape_change_time_sec # min inter-target distance in TIME (duration of 6 shapes)
 sequence_size = int(np.ceil(total_frames /change_shapes)) # size of sequence
-max_targets = int(TRIAL_TIME/ min_target_key_distance) # maximum targets in a trial
-min_targets = max_targets // 3 # minimum targets in a trial
 
-# load sequence and target info dictionaries (overt and covert)
+
 # load sequence and target info dictionaries (overt and covert)
 with open(os.path.join(sequence_path,f'P{N_PARTICIPANT}_overt.json'), 'rb') as f:
     overt_data = json.load(f)    
     
 with open(os.path.join(sequence_path,f'P{N_PARTICIPANT}_covert.json'), 'r') as f:
     covert_data = json.load(f)
-    
 
 # load specific information about sequences and target info for both conditions
 
@@ -131,7 +128,7 @@ keyboard.add_text_field("text", "", (SCREEN_SIZE[0] - STT_WIDTH * ppd, TEXT_FIEL
 
 # Add fixation/cue text field
 keyboard.add_text_field("fix", "", ((3 * ppd, 3 * ppd)), (0,0), (0, 0, 0), (-1, -1, -1), auto_draw=True)
-
+keyboard.set_field_text("fix", "+")
 #Circle Positions
 y_pos_both =  (-SPACING_X/2 * ppd - TEXT_FIELD_HEIGHT * ppd)* np.tan(np.radians(ANGLE_FROM_FIXATION))
 x_pos_left = (-1)*(CIRCLE_WIDTH + SPACING_X) * ppd
@@ -144,9 +141,18 @@ All_Images_Right = {}
 
 for shape in SHAPES:     
     images = [os.path.join(images_path,f'{shape}_{color}.png') for color in CIRCLE_COLORS]
-
-    All_Images_Left[shape] = keyboard.image_selector(shape, (CIRCLE_WIDTH * ppd, CIRCLE_HEIGHT * ppd), (x_pos_left,y_pos_both), images) 
-    All_Images_Right[shape] = keyboard.image_selector(shape, (CIRCLE_WIDTH * ppd, CIRCLE_HEIGHT * ppd), (x_pos_right,y_pos_both), images)
+    
+    if shape == 'r': # rectangle is drawn by default on the left
+        All_Images_Left[shape] = keyboard.image_selector(shape, (CIRCLE_WIDTH * ppd, CIRCLE_HEIGHT * ppd), (x_pos_left,y_pos_both), images, auto_draw = True) 
+        All_Images_Right[shape] = keyboard.image_selector(shape, (CIRCLE_WIDTH * ppd, CIRCLE_HEIGHT * ppd), (x_pos_right,y_pos_both), images)
+         
+    elif shape == 'i': # triangle is drawn by default on the right
+        All_Images_Left[shape] = keyboard.image_selector(shape, (CIRCLE_WIDTH * ppd, CIRCLE_HEIGHT * ppd), (x_pos_left,y_pos_both), images) 
+        All_Images_Right[shape] = keyboard.image_selector(shape, (CIRCLE_WIDTH * ppd, CIRCLE_HEIGHT * ppd), (x_pos_right,y_pos_both), images, auto_draw = True)
+    else:
+    
+        All_Images_Left[shape] = keyboard.image_selector(shape, (CIRCLE_WIDTH * ppd, CIRCLE_HEIGHT * ppd), (x_pos_left,y_pos_both), images) 
+        All_Images_Right[shape] = keyboard.image_selector(shape, (CIRCLE_WIDTH * ppd, CIRCLE_HEIGHT * ppd), (x_pos_right,y_pos_both), images)
 
 All_Images = [stt_image,All_Images_Left,All_Images_Right]
 
@@ -225,6 +231,7 @@ for run_i in range(runs.shape[0]):
             cued_side = 'RIGHT'
             cue_sym = '>'
 
+        # targets in non_cued_side
         if run_i==0: # the first run is always set to be overt 
             cued_sequence = overt_cued_sequences[i_trial]
             non_cued_sequence = overt_non_cued_sequences[i_trial]
@@ -248,7 +255,7 @@ for run_i in range(runs.shape[0]):
         print('targets in this trial',targets_in_trial_cued)# keyboard.set_field_text("text", "")
         print('SIDE',cued_side)
 
-        # Cue
+        # Cue 
         #cue start
         keyboard.log(marker = ["visual","cmd","start_cue", json.dumps(cue_sym)])
         
@@ -258,7 +265,6 @@ for run_i in range(runs.shape[0]):
         
         #cue stop
         keyboard.log(marker = ["visual","cmd","stop_cue",""])
-        
         
         # Fixation
         keyboard.set_field_text("fix", "+")
@@ -274,14 +280,15 @@ for run_i in range(runs.shape[0]):
                      shape_change_time_sec= shape_change_time_sec,
                      start_marker= ["visual", "cmd", "start_stimulus", json.dumps(1+i_trial)],
                      stop_marker= ["visual", "cmd", "stop_stimulus", json.dumps(1+i_trial)])
-
+        
         # Target Count Confirmation
         keyboard.set_field_text("fix", "?")
-        keyboard.window.flip()  
+        keyboard.window.flip() 
         
         # Wait response
         response = ''
         timer = core.CountdownTimer(RESPONSE_TIME)
+        response = ''
         while timer.getTime() > 0:
             #log response start
             keyboard.log(marker = ["visual","cmd","start_response",""])            
@@ -303,11 +310,10 @@ for run_i in range(runs.shape[0]):
         
         print("response is:", response)
         keyboard.log(marker = ["visual","cmd","stop_response",json.dumps(response)])
-        
-        # Present feedback
         if response != '':
             response = float(response)
-            
+        
+        # Present feedback
         if response == targets_in_trial_cued:
             keyboard.set_field_text("fix", "+++")
             run_accuracy_vec[i_trial] = 1
