@@ -1,14 +1,15 @@
 """
-@author: Shekhar Narayanan (SN) (shekharnarayanan833@gmail.com), Jordy Thielen (jordy.thielen@donders.ru.nl)
+@author: Shekhar Narayanan (shekharnarayanan833@gmail.com), Jordy Thielen (jordy.thielen@donders.ru.nl)
 
 Python implementation for the stimulus paradigm made for the covert c-VEP project.
 """
 
+
 import json
 import numpy as np
-from psychopy import visual, event, monitors, misc
-from psychopy import core
-from PIL import Image, ImageDraw
+from psychopy import visual, event, monitors, misc, core
+
+
 
 class Keyboard(object):
     """
@@ -85,7 +86,7 @@ class Keyboard(object):
         """
         return int(np.round(self.window.getActualFrameRate()))
     
-    
+
     def image_selector(self, name: str, size: tuple, pos, images=["white.png", "blue.png"], auto_draw = False):
         """
         Add circular spaces/ stimulus timing tracker (STT) to the stimulus paradigm
@@ -108,7 +109,7 @@ class Keyboard(object):
         
         for image in images:  
                         
-            image_stim = visual.ImageStim(win=self.window,image=image,units="pix",pos=pos,size=size,autoLog=False)
+            image_stim = visual.ImageStim(win=self.window,image=image,units="pix",pos=pos,size=size,autoLog=False, interpolate=True)
             images_out[name].append(image_stim)
             
         if auto_draw:
@@ -221,6 +222,8 @@ class Keyboard(object):
 
         # disabling autodraw during code presentation
         stt_image['stt'][0].setAutoDraw(False)
+        Dict_Images_left['r']['r'][0].setAutoDraw(False)
+        Dict_Images_right['i']['i'][0].setAutoDraw(False)
                 
         # Send start marker
         self.log(start_marker, on_flip=True)
@@ -238,6 +241,7 @@ class Keyboard(object):
             for name, _ in codes.items(): 
 
                 if name == 'stt':
+
                     stt_image["stt"][code_stt[i % len(code_stt)]].draw()
 
             # left side has the cued shape sequence
@@ -296,6 +300,8 @@ class Keyboard(object):
 
         # set autodraw to true to keep stt visible
         stt_image['stt'][0].setAutoDraw(True)
+        Dict_Images_left['r']['r'][0].setAutoDraw(True)
+        Dict_Images_right['i']['i'][0].setAutoDraw(True)
         
         self.window.flip()
         
