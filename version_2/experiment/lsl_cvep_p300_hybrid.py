@@ -79,23 +79,28 @@ max_targets = int(TRIAL_TIME/ min_target_key_distance) # maximum targets in a tr
 min_targets = max_targets // 3 # minimum targets in a trial
 
 # load sequence and target info dictionaries (overt and covert)
-with open(os.path.join(sequence_path,f'P{N_PARTICIPANT}_overt.pickle'), 'rb') as f:
-    all_info_overt = pickle.load(f)
-    seq_info_overt, targ_info_overt = all_info_overt['sequence_info'], all_info_overt['target_count_info']
+# load sequence and target info dictionaries (overt and covert)
+with open(os.path.join(sequence_path,f'P{N_PARTICIPANT}_overt.json'), 'rb') as f:
+    overt_data = json.load(f)    
     
-with open(os.path.join(sequence_path,f'P{N_PARTICIPANT}_covert.pickle'), 'rb') as f:
-    all_info_covert = pickle.load(f)
-    seq_info_covert, targ_info_covert = all_info_covert['sequence_info'], all_info_covert['target_count_info']
+with open(os.path.join(sequence_path,f'P{N_PARTICIPANT}_covert.json'), 'r') as f:
+    covert_data = json.load(f)
+    
 
 # load specific information about sequences and target info for both conditions
 
 # overt 
-cued_sequences_overt, cued_targ_counts_overt = seq_info_overt['cued_sequences'], targ_info_overt['cued_target_counts'] # cued seq and targ counts
-non_cued_sequences_overt, non_cued_targ_counts_overt =  seq_info_overt['non_cued_sequences'],  targ_info_overt['non_cued_target_counts']
+overt_cued_sequences = np.array(overt_data['sequence_info']['cued_sequences'])
+overt_non_cued_sequences = np.array(overt_data['sequence_info']['non_cued_sequences'])
+overt_cued_target_counts = np.array(overt_data['target_count_info']['cued_target_counts'])
+overt_non_cued_target_counts = np.array(overt_data['target_count_info']['non_cued_target_counts'])
+
 
 # covert 
-cued_sequences_covert, cued_targ_counts_covert = seq_info_covert['cued_sequences'], targ_info_covert['cued_target_counts'] # cued seq and targ counts
-non_cued_sequences_covert, non_cued_targ_counts_covert =  seq_info_covert['non_cued_sequences'],  targ_info_covert['non_cued_target_counts']
+covert_cued_sequences = np.array(covert_data['sequence_info']['cued_sequences'])
+covert_non_cued_sequences = np.array(covert_data['sequence_info']['non_cued_sequences'])
+covert_cued_target_counts = np.array(covert_data['target_count_info']['cued_target_counts'])
+covert_non_cued_target_counts = np.array(covert_data['target_count_info']['non_cued_target_counts'])
 
 # chosen code
 code = 'mgold_61_6521'
@@ -220,18 +225,17 @@ for run_i in range(runs.shape[0]):
             cued_side = 'RIGHT'
             cue_sym = '>'
 
-        # targets in non_cued_side
         if run_i==0: # the first run is always set to be overt 
-            cued_sequence = cued_sequences_overt[i_trial]
-            non_cued_sequence = non_cued_sequences_overt[i_trial]
-            targets_in_trial_cued = cued_targ_counts_overt[i_trial]
-            targets_in_trial_non_cued = non_cued_targ_counts_overt[i_trial]
+            cued_sequence = overt_cued_sequences[i_trial]
+            non_cued_sequence = overt_non_cued_sequences[i_trial]
+            targets_in_trial_cued = overt_cued_target_counts[i_trial]
+            targets_in_trial_non_cued = overt_non_cued_target_counts[i_trial]
             
         else: # the next 4 runs are covert
-            cued_sequence = cued_sequences_covert[i_trial]
-            non_cued_sequence = non_cued_sequences_covert[i_trial]
-            targets_in_trial_cued = cued_targ_counts_covert[i_trial]
-            targets_in_trial_non_cued = non_cued_targ_counts_covert[i_trial]
+            cued_sequence = covert_cued_sequences[i_trial]
+            non_cued_sequence = covert_non_cued_sequences[i_trial]
+            targets_in_trial_cued = covert_cued_target_counts[i_trial]
+            targets_in_trial_non_cued = covert_non_cued_target_counts[i_trial]
         
         #logging non_cued info
         keyboard.log(["visual","param","non_cued_sequence",json.dumps(non_cued_sequence.tolist())])
