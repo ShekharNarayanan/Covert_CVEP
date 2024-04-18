@@ -44,11 +44,11 @@ experimental_params:
   
 
   # Run wait time: 5s
-  CUE_TIME: 0  # 1  #0.8
-  TRIAL_TIME: 10 #20 # 10 for overt// dk for covert, 5 reps
-  RESPONSE_TIME: 1
-  FEEDBACK_TIME: 1  #5 
-  ITI_TIME: 0  #1
+  CUE_TIME: 1  
+  TRIAL_TIME: 20 
+  RESPONSE_TIME: 5
+  FEEDBACK_TIME: 1  
+  ITI_TIME: 1
 
   # Number of trials 
   N_TRIALS: 20
