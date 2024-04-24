@@ -5,9 +5,9 @@ The goal of the project is to develop a novel gaze-independent brain-computer in
 
 # Contents
 Contents:
-1. The codes or sequences used for flashing stimuli during the experiment
-2. Images that are flashed
-3. speller.py (various):Python code for creating the experimental paradigms (square stimuli, circular stimuli and their extended sequential format versions)
+1. 
+2.
+3.
 
 
 
