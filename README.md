@@ -1,7 +1,7 @@
 # Covert_CVEP
 
 # Main Idea
-The aim of this project is to develop a **_covert_** code modulated Visual Evoked Potential (cVEP) brain computer interface (BCI) speller aimed at helping people with ALS communicate. The end goal is to eliminating the need for eye-tracking in an online protocol, since many who suffer from ALS do not have control over muscles responsible for ocular movements.
+The goal of the project is to develop a novel gaze-independent brain-computer interface (BCI) based on code-modulated visual evoked potentials (C-VEP) for people living with late stage ALS. This repository contains code for the offline protocol of the said project.
 
 # Contents
 Contents:
