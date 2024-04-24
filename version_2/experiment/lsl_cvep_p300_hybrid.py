@@ -230,7 +230,10 @@ for run_i in range(runs.shape[0]):
         else:
             cued_side = 'RIGHT'
             cue_sym = '>'
-
+        # log cued side to define labels for the experiment
+        keyboard.log(["visual","param","cued_side",json.dumps(cued_side)])   
+        keyboard.log(["visual","param","num_targets_cued",json.dumps(targets_in_trial_cued)]) 
+        
         # targets in non_cued_side
         if run_i==0: # the first run is always set to be overt 
             cued_sequence = overt_cued_sequences[i_trial]
