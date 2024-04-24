@@ -200,6 +200,13 @@ run_3 = np.random.permutation(run_2)
 run_4 = np.random.permutation(run_3)
 run_5 = np.random.permutation(run_4)
 
+# logging all the labels from the runs (0 is left, 1 is right)
+keyboard.log(["visual","param","labels_run_1",json.dumps(run_1.tolist())])
+keyboard.log(["visual","param","labels_run_2",json.dumps(run_2.tolist())])
+keyboard.log(["visual","param","labels_run_3",json.dumps(run_3.tolist())])
+keyboard.log(["visual","param","labels_run_4",json.dumps(run_4.tolist())])
+keyboard.log(["visual","param","labels_run_5",json.dumps(run_5.tolist())])
+
 # concatenating all runs (helps with indexing in the loop below)
 runs = np.vstack((run_1,run_2,run_3, run_4,run_5))
 
@@ -232,7 +239,6 @@ for run_i in range(runs.shape[0]):
             cue_sym = '>'
         # log cued side to define labels for the experiment
         keyboard.log(["visual","param","cued_side",json.dumps(cued_side)])   
-        keyboard.log(["visual","param","num_targets_cued",json.dumps(targets_in_trial_cued)]) 
         
         # targets in non_cued_side
         if run_i==0: # the first run is always set to be overt 
