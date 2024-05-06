@@ -18,9 +18,9 @@ import pickle
 #---------------------------------------------------------------
 
 # path to the project, shape sequences and the images used
-project_path = r'C:\Users\s1081686\Desktop\RA_Project\Scripts\pynt_codes\SN_experiment\experiment_version_2'
+project_path = r'D:\Users\bci\Covert_CVEP\experiment_v2'
 images_path = os.path.join(project_path,'images')
-codes_path = os.path.join(project_path,'codes')
+codes_path = os.path.join(project_path,'codes') # codes are different than graz
 sequence_path = os.path.join(project_path,'shape_sequences')
 
 with open(os.path.join(project_path,'config.yml'), "r") as yaml_file:
@@ -32,8 +32,8 @@ STREAM = experiment_params['STREAM'] # stream LSL data
 SCREEN = experiment_params['SCREEN'] # which screen to use, set to 0 for no projection
 
 # change  'HOME' to 'LAB' to run script on different monitor specifications, see config file
-SCREEN_SIZE = eval(experiment_params['SCREEN_SIZE_HOME_PC'])# resolution of the monitor 
-SCREEN_WIDTH = experiment_params['SCREEN_WIDTH_HOME_PC']  # width of the monitor in cm
+SCREEN_SIZE = eval(experiment_params['SCREEN_SIZE_LAB_PC'])# resolution of the monitor 
+SCREEN_WIDTH = experiment_params['SCREEN_WIDTH_LAB_PC']  # width of the monitor in cm
 SCREEN_DISTANCE = experiment_params['SCREEN_DISTANCE'] # distance at which the participant is seated
 SCREEN_COLOR = eval(experiment_params['SCREEN_COLOR']) # background color of the screen
 FR = experiment_params['FR_LAB']  # screen frame rate
@@ -200,7 +200,7 @@ run_3 = np.random.permutation(run_2)
 run_4 = np.random.permutation(run_3)
 run_5 = np.random.permutation(run_4)
 
-# logging all the labels from the runs (0 is left, 1 is right)
+# 0 is left 1 is right (logging all the labels from the run
 keyboard.log(["visual","param","labels_run_1",json.dumps(run_1.tolist())])
 keyboard.log(["visual","param","labels_run_2",json.dumps(run_2.tolist())])
 keyboard.log(["visual","param","labels_run_3",json.dumps(run_3.tolist())])
@@ -237,17 +237,19 @@ for run_i in range(runs.shape[0]):
         else:
             cued_side = 'RIGHT'
             cue_sym = '>'
+        
         # log cued side to define labels for the experiment
         keyboard.log(["visual","param","cued_side",json.dumps(cued_side)])   
         
+        
         # targets in non_cued_side
-        if run_i==0: # the first run is always set to be overt 
+        if run_i==4: # the last run is always set to be overt 
             cued_sequence = overt_cued_sequences[i_trial]
             non_cued_sequence = overt_non_cued_sequences[i_trial]
             targets_in_trial_cued = overt_cued_target_counts[i_trial]
             targets_in_trial_non_cued = overt_non_cued_target_counts[i_trial]
             
-        else: # the next 4 runs are covert
+        else: # the first four 4 runs are covert
             cued_sequence = covert_cued_sequences[i_trial]
             non_cued_sequence = covert_non_cued_sequences[i_trial]
             targets_in_trial_cued = covert_cued_target_counts[i_trial]
@@ -259,7 +261,8 @@ for run_i in range(runs.shape[0]):
         
         #logging cued info
         keyboard.log(["visual","param","cued_sequence",json.dumps(cued_sequence.tolist())])   
-        keyboard.log(["visual","param","num_targets_cued",json.dumps(targets_in_trial_cued)])
+        # deviating from the logging format for this log
+        keyboard.log(["param","num_targets_on_cued_side",json.dumps(cued_side),json.dumps(targets_in_trial_cued)])
   
         print('targets in this trial',targets_in_trial_cued)# keyboard.set_field_text("text", "")
         print('SIDE',cued_side)

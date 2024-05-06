@@ -253,8 +253,17 @@ class Keyboard(object):
 
                     shape_left_side = cued_sequence[int((i-rem1)/change_frames)]  
                     shape_right_side = non_cued_sequence[int((i-rem1)/change_frames)]
+                    
+                    # log markers relevant to p300 feature extraction
+                    # log target information specifically: left cued side
+                    if shape_left_side == 'h':
+                        self.log(["target_shape_cued_side", "",json.dumps(cued_side), json.dumps(initials_to_shapes[shape_left_side])])
+                    else:
+                        self.log(["non_target_shapes_cued_side", "",json.dumps(cued_side), json.dumps(initials_to_shapes[shape_left_side])])
+                        self.log(["non_target_shapes_non_cued_side", "",json.dumps(cued_side), json.dumps(initials_to_shapes[shape_right_side])])                        
 
-                    self.log(["Left_and_Right_symbols", "","", json.dumps([initials_to_shapes[shape_left_side], initials_to_shapes[shape_right_side]])])
+                    self.log(["Left_and_Right_symbols", "", json.dumps(cued_side), json.dumps([initials_to_shapes[shape_left_side], initials_to_shapes[shape_right_side]])])
+                    
                     
                     Dict_Images_left[shape_left_side][shape_left_side][code_left[i % len(code_left)]].draw()                 
                     Dict_Images_right[shape_right_side][shape_right_side][code_right[i % len(code_right)]].draw()
@@ -262,9 +271,18 @@ class Keyboard(object):
                 else:
                     rem2 = i%change_frames
                     shape_left_side = cued_sequence[int((i  - rem2)/change_frames)]
-                    shape_right_side = non_cued_sequence[int((i  - rem2)/change_frames)]
-                      
-                    self.log(["Left_and_Right_symbols", "","", json.dumps([initials_to_shapes[shape_left_side], initials_to_shapes[shape_right_side]])])
+                    shape_right_side = non_cued_sequence[int((i  - rem2)/change_frames)]                     
+                    
+                    # log markers relevant to p300 feature extraction
+                    # log target information specifically: left cued side
+                    if shape_left_side == 'h':
+                        self.log(["target_shape_cued_side", "",json.dumps(cued_side), json.dumps(initials_to_shapes[shape_left_side])])
+                    else:
+                        self.log(["non_target_shapes_cued_side", "",json.dumps(cued_side), json.dumps(initials_to_shapes[shape_left_side])])
+                        self.log(["non_target_shapes_non_cued_side", "",json.dumps(cued_side), json.dumps(initials_to_shapes[shape_right_side])])
+                        
+                    self.log(["Left_and_Right_symbols", "",json.dumps(cued_side), json.dumps([initials_to_shapes[shape_left_side], initials_to_shapes[shape_right_side]])])   
+                    
                     Dict_Images_left[shape_left_side][shape_left_side][code_left[i % len(code_left)]].draw()                 
                     Dict_Images_right[shape_right_side][shape_right_side][code_right[i % len(code_right)]].draw()
 
@@ -276,8 +294,17 @@ class Keyboard(object):
                     rem1 = i%change_frames
                     shape_left_side = non_cued_sequence[int((i-rem1)/change_frames)]
                     shape_right_side = cued_sequence[int((i-rem1)/change_frames)] 
+                    
+                    # log markers relevant to p300 feature extraction
+                    # log target information specifically: right cued side
+                    if shape_right_side == 'h':
+                        self.log(["target_shape_cued_side", "",json.dumps(cued_side), json.dumps(initials_to_shapes[shape_right_side])])
+                    else:
+                        self.log(["non_target_shapes_cued_side", "",json.dumps(cued_side), json.dumps(initials_to_shapes[shape_right_side])])
+                        self.log(["non_target_shapes_non_cued_side", "",json.dumps(cued_side), json.dumps(initials_to_shapes[shape_left_side])])
 
-                    self.log(["Left_and_Right_symbols", "","", json.dumps([initials_to_shapes[shape_left_side], initials_to_shapes[shape_right_side]])])                                           
+                    self.log(["Left_and_Right_symbols", "",json.dumps(cued_side), json.dumps([initials_to_shapes[shape_left_side], initials_to_shapes[shape_right_side]])]) 
+                    
                     Dict_Images_right[shape_right_side][shape_right_side][code_right[i % len(code_right)]].draw()
                     Dict_Images_left[shape_left_side][shape_left_side][code_left[i % len(code_left)]].draw() 
 
@@ -286,7 +313,16 @@ class Keyboard(object):
                     shape_left_side = non_cued_sequence[int((i  - rem2)/change_frames)]
                     shape_right_side = cued_sequence[int((i  - rem2)/change_frames)]
                     
-                    self.log(["Left_and_Right_symbols", "","", json.dumps([initials_to_shapes[shape_left_side], initials_to_shapes[shape_right_side]])])                        
+                    # log markers relevant to p300 feature extraction
+                    # log target information specifically: right cued side
+                    if shape_right_side == 'h':
+                        self.log(["target_shape_cued_side", "",json.dumps(cued_side), json.dumps(initials_to_shapes[shape_right_side])])
+                    else:
+                        self.log(["non_target_shapes_cued_side", "",json.dumps(cued_side), json.dumps(initials_to_shapes[shape_right_side])])
+                        self.log(["non_target_shapes_non_cued_side", "",json.dumps(cued_side), json.dumps(initials_to_shapes[shape_left_side])])
+
+                    self.log(["Left_and_Right_symbols", "",json.dumps(cued_side), json.dumps([initials_to_shapes[shape_left_side], initials_to_shapes[shape_right_side]])])  
+                    
                     Dict_Images_right[shape_right_side][shape_right_side][code_right[i % len(code_right)]].draw()
                     Dict_Images_left[shape_left_side][shape_left_side][code_left[i % len(code_left)]].draw() 
                     
