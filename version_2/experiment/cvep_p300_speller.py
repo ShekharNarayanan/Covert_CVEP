@@ -1,10 +1,3 @@
-"""
-@author: Shekhar Narayanan (shekharnarayanan833@gmail.com), Jordy Thielen (jordy.thielen@donders.ru.nl)
-
-Python implementation for the stimulus paradigm made for the covert c-VEP project.
-"""
-
-
 import json
 import numpy as np
 from psychopy import visual, event, monitors, misc, core
@@ -198,8 +191,7 @@ class Keyboard(object):
                 Information used for logging
             
         """
-        initials_to_shapes = {'c': 'circle' , 'h' :'hour_glass', 'i': 'inverted_triangle', 't': 'triangle', 'r':'rectangle'}
-    
+        initials_to_shapes = {'c': 'circle' , 'h' :'hour_glass', 'i': 'inverted_triangle', 't': 'triangle', 'r':'rectangle'}     
 
         # get images
         stt_image = All_Images[0]
@@ -212,14 +204,15 @@ class Keyboard(object):
         code_stt = codes["stt"]
 
         change_frames = int(shape_change_time_sec * FR) # the number of frames after which the shapes will change during the trial
-        
+        print(change_frames)
    
         # Set number of frames
         if duration is None:        
             n_frames = len(codes[list(codes.keys())[0]])            
         else:            
             n_frames = int(duration * FR)
-
+        
+        print(n_frames)
         # disabling autodraw during code presentation
         stt_image['stt'][0].setAutoDraw(False)
         Dict_Images_left['r']['r'][0].setAutoDraw(False)
@@ -227,7 +220,11 @@ class Keyboard(object):
                 
         # Send start marker
         self.log(start_marker, on_flip=True)
-
+        
+        # using shape history of one of the circles to decide when to log them both (only one is needed because shapes on both sides change simultaneously)
+        prev_shape = ''
+        # c = 0
+        
         # Loop frame flips
         for i in range(n_frames): 
 
@@ -249,28 +246,30 @@ class Keyboard(object):
             if cued_side == 'LEFT' :            
                 
                 if (i % (2*change_frames)) < change_frames: # logic for changing the shapes
-                    
+                
                     rem1 = i % (2*change_frames)
 
                     shape_left_side = cued_sequence[int((i-rem1)/change_frames)]  
                     shape_right_side = non_cued_sequence[int((i-rem1)/change_frames)]
 
-                    if shape_left_side == prev:
-                        continue
-                    else:
-                        prev = shape_left_side
-                        print("log")
-                    # log markers relevant to p300 feature extraction
-                    # log target information specifically: left cued side
+                    if shape_left_side == prev_shape:
+                        pass
                     
-                    if shape_left_side == 'h':
-                        self.log(["target_shape_cued_side", "",json.dumps(cued_side), json.dumps(initials_to_shapes[shape_left_side])])
-                    else:
-                        self.log(["non_target_shapes_cued_side", "",json.dumps(cued_side), json.dumps(initials_to_shapes[shape_left_side])])
-                        self.log(["non_target_shapes_non_cued_side", "",json.dumps(cued_side), json.dumps(initials_to_shapes[shape_right_side])])                        
-
-                    self.log(["Left_and_Right_symbols", "", json.dumps(cued_side), json.dumps([initials_to_shapes[shape_left_side], initials_to_shapes[shape_right_side]])])
-                    
+                    else:                                                
+                        if shape_left_side == 'h':
+                            target = 1
+                        else:
+                            target = 0
+                        
+                        self.log(["visual","cmd","left_shape_stim",json.dumps(f'shape={initials_to_shapes[shape_left_side]};target={target}')])
+                        self.log(["visual","cmd","right_shape_stim",json.dumps(f'shape={initials_to_shapes[shape_right_side]};target={target}')])
+                        prev_shape = shape_left_side
+                        
+                        # print(f"log left {initials_to_shapes[shape_left_side]}")
+                        # print(f"log right {initials_to_shapes[shape_right_side]}")
+                        # c += 1
+                        # print(f"shapes set {c}")
+                
                     
                     Dict_Images_left[shape_left_side][shape_left_side][code_left[i % len(code_left)]].draw()                 
                     Dict_Images_right[shape_right_side][shape_right_side][code_right[i % len(code_right)]].draw()
@@ -278,24 +277,27 @@ class Keyboard(object):
                 else:
                 
                     rem2 = i%change_frames
+                    
                     shape_left_side = cued_sequence[int((i  - rem2)/change_frames)]
                     shape_right_side = non_cued_sequence[int((i  - rem2)/change_frames)]                     
                     
-                    if shape_left_side == prev:
-                        continue
-                    else:
-                        prev = shape_left_side
-                        print("log")
+                    if shape_left_side == prev_shape:
+                        pass
+                    
+                    else:                                                
+                        if shape_left_side == 'h':
+                            target = 1
+                        else:
+                            target = 0
                         
-                    # log markers relevant to p300 feature extraction
-                    # log target information specifically: left cued side
-                    if shape_left_side == 'h':
-                        self.log(["target_shape_cued_side", "",json.dumps(cued_side), json.dumps(initials_to_shapes[shape_left_side])])
-                    else:
-                        self.log(["non_target_shapes_cued_side", "",json.dumps(cued_side), json.dumps(initials_to_shapes[shape_left_side])])
-                        self.log(["non_target_shapes_non_cued_side", "",json.dumps(cued_side), json.dumps(initials_to_shapes[shape_right_side])])
+                        self.log(["visual","cmd","left_shape_stim",json.dumps(f'shape={initials_to_shapes[shape_left_side]};target={target}')])
+                        self.log(["visual","cmd","right_shape_stim",json.dumps(f'shape={initials_to_shapes[shape_right_side]};target={target}')])
+                        prev_shape = shape_left_side
                         
-                    self.log(["Left_and_Right_symbols", "",json.dumps(cued_side), json.dumps([initials_to_shapes[shape_left_side], initials_to_shapes[shape_right_side]])])   
+                        # print(f"log left {initials_to_shapes[shape_left_side]}")
+                        # print(f"log right {initials_to_shapes[shape_right_side]}")
+                        # c += 1
+                        # print(f"shapes set {c}")
                     
                     Dict_Images_left[shape_left_side][shape_left_side][code_left[i % len(code_left)]].draw()                 
                     Dict_Images_right[shape_right_side][shape_right_side][code_right[i % len(code_right)]].draw()
@@ -309,15 +311,23 @@ class Keyboard(object):
                     shape_left_side = non_cued_sequence[int((i-rem1)/change_frames)]
                     shape_right_side = cued_sequence[int((i-rem1)/change_frames)] 
                     
-                    # log markers relevant to p300 feature extraction
-                    # log target information specifically: right cued side
-                    if shape_right_side == 'h':
-                        self.log(["target_shape_cued_side", "",json.dumps(cued_side), json.dumps(initials_to_shapes[shape_right_side])])
-                    else:
-                        self.log(["non_target_shapes_cued_side", "",json.dumps(cued_side), json.dumps(initials_to_shapes[shape_right_side])])
-                        self.log(["non_target_shapes_non_cued_side", "",json.dumps(cued_side), json.dumps(initials_to_shapes[shape_left_side])])
-
-                    self.log(["Left_and_Right_symbols", "",json.dumps(cued_side), json.dumps([initials_to_shapes[shape_left_side], initials_to_shapes[shape_right_side]])]) 
+                    if shape_right_side == prev_shape:
+                        pass
+                    
+                    else:                                                
+                        if shape_right_side == 'h':
+                            target = 1
+                        else:
+                            target = 0
+                        
+                        self.log(["visual","cmd","left_shape_stim",json.dumps(f'shape={initials_to_shapes[shape_left_side]};target={target}')])
+                        self.log(["visual","cmd","right_shape_stim",json.dumps(f'shape={initials_to_shapes[shape_right_side]};target={target}')])
+                        prev_shape = shape_right_side
+                        
+                        # print(f"log left {initials_to_shapes[shape_left_side]}")
+                        # print(f"log right {initials_to_shapes[shape_right_side]}")
+                        # c += 1
+                        # print(f"shapes set {c}")
                     
                     Dict_Images_right[shape_right_side][shape_right_side][code_right[i % len(code_right)]].draw()
                     Dict_Images_left[shape_left_side][shape_left_side][code_left[i % len(code_left)]].draw() 
@@ -327,15 +337,23 @@ class Keyboard(object):
                     shape_left_side = non_cued_sequence[int((i  - rem2)/change_frames)]
                     shape_right_side = cued_sequence[int((i  - rem2)/change_frames)]
                     
-                    # log markers relevant to p300 feature extraction
-                    # log target information specifically: right cued side
-                    if shape_right_side == 'h':
-                        self.log(["target_shape_cued_side", "",json.dumps(cued_side), json.dumps(initials_to_shapes[shape_right_side])])
-                    else:
-                        self.log(["non_target_shapes_cued_side", "",json.dumps(cued_side), json.dumps(initials_to_shapes[shape_right_side])])
-                        self.log(["non_target_shapes_non_cued_side", "",json.dumps(cued_side), json.dumps(initials_to_shapes[shape_left_side])])
-
-                    self.log(["Left_and_Right_symbols", "",json.dumps(cued_side), json.dumps([initials_to_shapes[shape_left_side], initials_to_shapes[shape_right_side]])])  
+                    if shape_right_side == prev_shape:
+                        pass
+                    
+                    else:                                                
+                        if shape_right_side == 'h':
+                            target = 1
+                        else:
+                            target = 0
+                        
+                        self.log(["visual","cmd","left_shape_stim",json.dumps(f'shape={initials_to_shapes[shape_left_side]};target={target}')])
+                        self.log(["visual","cmd","right_shape_stim",json.dumps(f'shape={initials_to_shapes[shape_right_side]};target={target}')])
+                        prev_shape = shape_right_side
+                        
+                        # print(f"log left {initials_to_shapes[shape_left_side]}")
+                        # print(f"log right {initials_to_shapes[shape_right_side]}")
+                        # c += 1
+                        # print(f"shapes set {c}") 
                     
                     Dict_Images_right[shape_right_side][shape_right_side][code_right[i % len(code_right)]].draw()
                     Dict_Images_left[shape_left_side][shape_left_side][code_left[i % len(code_left)]].draw() 
