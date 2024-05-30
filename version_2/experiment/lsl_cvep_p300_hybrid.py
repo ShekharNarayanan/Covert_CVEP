@@ -214,7 +214,7 @@ runs = np.vstack((run_1,run_2,run_3, run_4,run_5))
 for run_i in range(runs.shape[0]): 
     
     #start of run
-    keyboard.log(marker = ["visual","cmd","starting_run",json.dumps(1+run_i)])
+    keyboard.log(marker = ["visual","cmd","start_run",json.dumps(1+run_i)])
     keyboard.set_field_text("text", "Starting...")
     core.wait(1, hogCPUperiod= 0.2)
     keyboard.set_field_text("text", "")
@@ -229,20 +229,7 @@ for run_i in range(runs.shape[0]):
 
         # start_trial
         keyboard.log(marker = ["visual","cmd","start_trial",json.dumps(1+i_trial)])
-
-        # Choosing which side will be attended 
-        if run_current[i_trial] == 0:   
-            cued_side = 'LEFT'             
-            cue_sym = '<'
-        else:
-            cued_side = 'RIGHT'
-            cue_sym = '>'
         
-        # log cued side to define labels for the experiment
-        keyboard.log(["visual","param","cued_side",json.dumps(cued_side)])   
-        
-        
-        # targets in non_cued_side
         if run_i==4: # the last run is always set to be overt 
             cued_sequence = overt_cued_sequences[i_trial]
             non_cued_sequence = overt_non_cued_sequences[i_trial]
@@ -255,17 +242,36 @@ for run_i in range(runs.shape[0]):
             targets_in_trial_cued = covert_cued_target_counts[i_trial]
             targets_in_trial_non_cued = covert_non_cued_target_counts[i_trial]
         
-        #logging non_cued info
-        keyboard.log(["visual","param","non_cued_sequence",json.dumps(non_cued_sequence.tolist())])
-        keyboard.log(["visual","param","num_targets_non_cued",json.dumps(targets_in_trial_non_cued)]) 
+        if run_current[i_trial] == 0:   
+            cued_side = 'LEFT'             
+            cue_sym = '<'
+            
+            # log cued side to define labels for the experiment
+            keyboard.log(["visual","param","cued_side",json.dumps(cued_side)])   
+            
+            # details for sequences and num_targets for the cued side
+            keyboard.log(["visual","param","left_sequence",json.dumps(cued_sequence.tolist())]) 
+            keyboard.log(["visual","param","left_num_targets",json.dumps(targets_in_trial_cued)])
+            
+            # details for sequences and num_targets for the other side
+            keyboard.log(["visual","param","right_sequence",json.dumps(non_cued_sequence.tolist())]) 
+            keyboard.log(["visual","param","right_num_targets",json.dumps(targets_in_trial_non_cued)])
         
-        #logging cued info
-        keyboard.log(["visual","param","cued_sequence",json.dumps(cued_sequence.tolist())])   
-        # deviating from the logging format for this log
-        keyboard.log(["param","num_targets_on_cued_side",json.dumps(cued_side),json.dumps(targets_in_trial_cued)])
-  
-        print('targets in this trial',targets_in_trial_cued)# keyboard.set_field_text("text", "")
-        print('SIDE',cued_side)
+        else:
+            cued_side = 'RIGHT'
+            cue_sym = '>'
+            
+            # log cued side to define labels for the experiment
+            keyboard.log(["visual","param","cued_side",json.dumps(cued_side)]) 
+            
+            # details for sequences and num_targets for the cued side
+            keyboard.log(["visual","param","right_sequence",json.dumps(cued_sequence.tolist())]) 
+            keyboard.log(["visual","param","right_num_targets",json.dumps(targets_in_trial_cued)])
+            
+            # details for sequences and num_targets for the other side
+            keyboard.log(["visual","param","left_sequence",json.dumps(non_cued_sequence.tolist())]) 
+            keyboard.log(["visual","param","left_num_targets",json.dumps(targets_in_trial_non_cued)])
+        
 
         # Cue 
         #cue start
@@ -301,9 +307,9 @@ for run_i in range(runs.shape[0]):
         response = ''
         timer = core.CountdownTimer(RESPONSE_TIME)
         response = ''
-        while timer.getTime() > 0:
-            #log response start
-            keyboard.log(marker = ["visual","cmd","start_response",""])            
+        #log response start
+        keyboard.log(marker = ["visual","cmd","start_response",""]) 
+        while timer.getTime() > 0:                       
             key = event.getKeys(keyList=["return", "backspace", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "num_1", "num_2", "num_3", "num_4", "num_5", "num_6", "num_7", "num_8", "num_9", "num_0"])
             
             if len(key) > 0:
