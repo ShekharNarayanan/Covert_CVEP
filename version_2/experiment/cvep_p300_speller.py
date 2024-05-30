@@ -243,19 +243,26 @@ class Keyboard(object):
                 if name == 'stt':
 
                     stt_image["stt"][code_stt[i % len(code_stt)]].draw()
-
+            
             # left side has the cued shape sequence
+            
             if cued_side == 'LEFT' :            
-
+                
                 if (i % (2*change_frames)) < change_frames: # logic for changing the shapes
                     
                     rem1 = i % (2*change_frames)
 
                     shape_left_side = cued_sequence[int((i-rem1)/change_frames)]  
                     shape_right_side = non_cued_sequence[int((i-rem1)/change_frames)]
-                    
+
+                    if shape_left_side == prev:
+                        continue
+                    else:
+                        prev = shape_left_side
+                        print("log")
                     # log markers relevant to p300 feature extraction
                     # log target information specifically: left cued side
+                    
                     if shape_left_side == 'h':
                         self.log(["target_shape_cued_side", "",json.dumps(cued_side), json.dumps(initials_to_shapes[shape_left_side])])
                     else:
@@ -269,10 +276,17 @@ class Keyboard(object):
                     Dict_Images_right[shape_right_side][shape_right_side][code_right[i % len(code_right)]].draw()
                     
                 else:
+                
                     rem2 = i%change_frames
                     shape_left_side = cued_sequence[int((i  - rem2)/change_frames)]
                     shape_right_side = non_cued_sequence[int((i  - rem2)/change_frames)]                     
                     
+                    if shape_left_side == prev:
+                        continue
+                    else:
+                        prev = shape_left_side
+                        print("log")
+                        
                     # log markers relevant to p300 feature extraction
                     # log target information specifically: left cued side
                     if shape_left_side == 'h':
