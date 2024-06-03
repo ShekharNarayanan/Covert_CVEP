@@ -222,7 +222,8 @@ class Keyboard(object):
         # using shape history of one of the circles to decide when to log them both (only one is needed because shapes on both sides change simultaneously)
         prev_shape_left = ''
         prev_shape_right  = ''
-        c = 0
+        c_l = 0
+        c_r = 0
         
         # Loop frame flips
         for i in range(n_frames): 
@@ -250,30 +251,36 @@ class Keyboard(object):
                 shape_right_side = right_sequence[int((i-rem1)/change_frames)]
 
                 # logic for logging the shapes on the screen
-                if (shape_left_side == prev_shape_left) and (shape_right_side == prev_shape_right):
-                    pass
-                
-                else:                                                
+                if (shape_left_side != prev_shape_left):
+                    
                     if cued_side == 'LEFT' and initials_to_shapes[shape_left_side] == 'hour_glass':
                         target = 1
-                        
-                    elif cued_side == 'RIGHT' and initials_to_shapes[shape_right_side] == 'hour_glass':
+                    else:
+                        target = 0
+                    self.log(["visual","cmd","left_shape_stim",json.dumps(f'shape={initials_to_shapes[shape_left_side]};target={target}')])
+                    prev_shape_left = shape_left_side
+                    c_l += 1
+                    print(f"log left {initials_to_shapes[shape_left_side]}")
+                    print(f"shape num left{c_l}")
+                
+                else:
+                    pass
+                    
+                if (shape_right_side != prev_shape_right):
+                    if cued_side == 'RIGHT' and initials_to_shapes[shape_right_side] == 'hour_glass':
                         target = 1
                         
                     else:
                         target = 0
-                    
-                    self.log(["visual","cmd","left_shape_stim",json.dumps(f'shape={initials_to_shapes[shape_left_side]};target={target}')])
+                        
                     self.log(["visual","cmd","right_shape_stim",json.dumps(f'shape={initials_to_shapes[shape_right_side]};target={target}')])
-                    
-                    prev_shape_left = shape_left_side
                     prev_shape_right = shape_right_side
+                    # c_r += 1
+                    # print(f"log right {initials_to_shapes[shape_right_side]}")
+                    # print(f"shape num right{c_r}")
                     
-                    print(f"log left {initials_to_shapes[shape_left_side]}")
-                    print(f"log right {initials_to_shapes[shape_right_side]}")
-                    c += 1
-                    print(f"shapes set {c}")
-                    
+                else:
+                    pass
                 
                 Dict_Images_left[shape_left_side][shape_left_side][code_left[i % len(code_left)]].draw()                 
                 Dict_Images_right[shape_right_side][shape_right_side][code_right[i % len(code_right)]].draw()
@@ -285,29 +292,36 @@ class Keyboard(object):
                 shape_left_side = left_sequence[int((i  - rem2)/change_frames)]
                 shape_right_side = right_sequence[int((i  - rem2)/change_frames)]                     
                 
-                if (shape_left_side == prev_shape_left) and (shape_right_side == prev_shape_right):
-                    pass
-                
-                else:                                                
+                if (shape_left_side != prev_shape_left):
+                    
                     if cued_side == 'LEFT' and initials_to_shapes[shape_left_side] == 'hour_glass':
                         target = 1
-                        
-                    elif cued_side == 'RIGHT' and initials_to_shapes[shape_right_side] == 'hour_glass':
+                    else:
+                        target = 0
+                    self.log(["visual","cmd","left_shape_stim",json.dumps(f'shape={initials_to_shapes[shape_left_side]};target={target}')])
+                    prev_shape_left = shape_left_side
+                    # c_l += 1
+                    # print(f"log left {initials_to_shapes[shape_left_side]}")
+                    # print(f"shape num left{c_l}")
+                
+                else:
+                    pass
+                    
+                if (shape_right_side != prev_shape_right):
+                    if cued_side == 'RIGHT' and initials_to_shapes[shape_right_side] == 'hour_glass':
                         target = 1
                         
                     else:
                         target = 0
-                    
-                    self.log(["visual","cmd","left_shape_stim",json.dumps(f'shape={initials_to_shapes[shape_left_side]};target={target}')])
+                        
                     self.log(["visual","cmd","right_shape_stim",json.dumps(f'shape={initials_to_shapes[shape_right_side]};target={target}')])
-                    
-                    prev_shape_left = shape_left_side
                     prev_shape_right = shape_right_side
+                    # c_r += 1
+                    # print(f"log right {initials_to_shapes[shape_right_side]}")
+                    # print(f"shape num right{c_r}")
                     
-                    print(f"log left {initials_to_shapes[shape_left_side]}")
-                    print(f"log right {initials_to_shapes[shape_right_side]}")
-                    c += 1
-                    print(f"shapes set {c}")
+                else:
+                    pass
                 
                 Dict_Images_left[shape_left_side][shape_left_side][code_left[i % len(code_left)]].draw()                 
                 Dict_Images_right[shape_right_side][shape_right_side][code_right[i % len(code_right)]].draw()
