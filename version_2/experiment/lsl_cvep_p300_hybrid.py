@@ -129,6 +129,7 @@ keyboard.add_text_field("text", "", (SCREEN_SIZE[0] - STT_WIDTH * ppd, TEXT_FIEL
 # Add fixation/cue text field
 keyboard.add_text_field("fix", "", ((3 * ppd, 3 * ppd)), (0,0), (0, 0, 0), (-1, -1, -1), auto_draw=True)
 keyboard.set_field_text("fix", "+")
+
 #Circle Positions
 y_pos_both =  (-SPACING_X/2 * ppd - TEXT_FIELD_HEIGHT * ppd)* np.tan(np.radians(ANGLE_FROM_FIXATION))
 x_pos_left = (-1)*(CIRCLE_WIDTH + SPACING_X) * ppd
@@ -200,13 +201,6 @@ run_3 = np.random.permutation(run_2)
 run_4 = np.random.permutation(run_3)
 run_5 = np.random.permutation(run_4)
 
-# 0 is left 1 is right (logging all the labels from the run
-keyboard.log(["visual","param","labels_run_1",json.dumps(run_1.tolist())])
-keyboard.log(["visual","param","labels_run_2",json.dumps(run_2.tolist())])
-keyboard.log(["visual","param","labels_run_3",json.dumps(run_3.tolist())])
-keyboard.log(["visual","param","labels_run_4",json.dumps(run_4.tolist())])
-keyboard.log(["visual","param","labels_run_5",json.dumps(run_5.tolist())])
-
 # concatenating all runs (helps with indexing in the loop below)
 runs = np.vstack((run_1,run_2,run_3, run_4,run_5))
 
@@ -231,47 +225,35 @@ for run_i in range(runs.shape[0]):
         keyboard.log(marker = ["visual","cmd","start_trial",json.dumps(1+i_trial)])
         
         if run_i==4: # the last run is always set to be overt 
-            cued_sequence = overt_cued_sequences[i_trial]
-            non_cued_sequence = overt_non_cued_sequences[i_trial]
-            targets_in_trial_cued = overt_cued_target_counts[i_trial]
-            targets_in_trial_non_cued = overt_non_cued_target_counts[i_trial]
+            left_sequence = overt_left_seq[i_trial]
+            right_sequence = overt_right_seq[i_trial]
+            targets_left = overt_left_target_counts[i_trial]
+            targets_right = overt_right_target_counts[i_trial]
             
         else: # the first four 4 runs are covert
-            cued_sequence = covert_cued_sequences[i_trial]
-            non_cued_sequence = covert_non_cued_sequences[i_trial]
-            targets_in_trial_cued = covert_cued_target_counts[i_trial]
-            targets_in_trial_non_cued = covert_non_cued_target_counts[i_trial]
+            left_sequence = covert_left_seq[i_trial]
+            right_sequence = covert_right_seq[i_trial]
+            targets_left = covert_left_target_counts[i_trial]
+            targets_right = covert_right_target_counts[i_trial]
         
         if run_current[i_trial] == 0:   
             cued_side = 'LEFT'             
-            cue_sym = '<'
-            
-            # log cued side to define labels for the experiment
-            keyboard.log(["visual","param","cued_side",json.dumps(cued_side)])   
-            
-            # details for sequences and num_targets for the cued side
-            keyboard.log(["visual","param","left_sequence",json.dumps(cued_sequence.tolist())]) 
-            keyboard.log(["visual","param","left_num_targets",json.dumps(targets_in_trial_cued)])
-            
-            # details for sequences and num_targets for the other side
-            keyboard.log(["visual","param","right_sequence",json.dumps(non_cued_sequence.tolist())]) 
-            keyboard.log(["visual","param","right_num_targets",json.dumps(targets_in_trial_non_cued)])
-        
+            cue_sym = '<'           
+  
         else:
             cued_side = 'RIGHT'
             cue_sym = '>'
-            
-            # log cued side to define labels for the experiment
-            keyboard.log(["visual","param","cued_side",json.dumps(cued_side)]) 
-            
-            # details for sequences and num_targets for the cued side
-            keyboard.log(["visual","param","right_sequence",json.dumps(cued_sequence.tolist())]) 
-            keyboard.log(["visual","param","right_num_targets",json.dumps(targets_in_trial_cued)])
-            
-            # details for sequences and num_targets for the other side
-            keyboard.log(["visual","param","left_sequence",json.dumps(non_cued_sequence.tolist())]) 
-            keyboard.log(["visual","param","left_num_targets",json.dumps(targets_in_trial_non_cued)])
+
+        # log cued side to define labels for the experiment
+        keyboard.log(["visual","param","cued_side",json.dumps(cued_side)])   
         
+        # details for sequences and num_targets for the left side
+        keyboard.log(["visual","param","left_sequence",json.dumps(left_sequence.tolist())]) 
+        keyboard.log(["visual","param","left_num_targets",json.dumps(targets_left)])
+        
+        # details for sequences and num_targets for the right side
+        keyboard.log(["visual","param","right_sequence",json.dumps(right_sequence.tolist())]) 
+        keyboard.log(["visual","param","right_num_targets",json.dumps(targets_right)])
 
         # Cue 
         #cue start
@@ -289,8 +271,8 @@ for run_i in range(runs.shape[0]):
     
         # Trial      
         keyboard.run(FR = FR, 
-                     cued_sequence= cued_sequence, 
-                     non_cued_sequence= non_cued_sequence,
+                     left_sequence= left_sequence, 
+                     right_sequence= right_sequence,
                      All_Images= All_Images, 
                      codes= codes, 
                      duration= TRIAL_TIME, 
@@ -332,9 +314,14 @@ for run_i in range(runs.shape[0]):
             response = float(response)
         
         # Present feedback
-        if response == targets_in_trial_cued:
+        if (cued_side == 'LEFT') and (response == targets_left):
             keyboard.set_field_text("fix", "+++")
             run_accuracy_vec[i_trial] = 1
+            
+        elif (cued_side == 'RIGHT') and (response == targets_right):
+            keyboard.set_field_text("fix", "+++")
+            run_accuracy_vec[i_trial] = 1 
+                       
         else:
             keyboard.set_field_text("fix", "---")
             run_accuracy_vec[i_trial] = 0
@@ -343,7 +330,6 @@ for run_i in range(runs.shape[0]):
         keyboard.log(marker = ["visual","cmd","start_feedback",""])
         core.wait(FEEDBACK_TIME, hogCPUperiod= 0.2)
         keyboard.log(marker = ["visual","cmd","stop_feedback",""])
-
 
         # Inter-trial time
         keyboard.set_field_text("fix", "+")
@@ -376,5 +362,3 @@ print("Stopping.")
 keyboard.set_field_text("text", "")
 keyboard.quit()
 print("Finished.")
-
-
