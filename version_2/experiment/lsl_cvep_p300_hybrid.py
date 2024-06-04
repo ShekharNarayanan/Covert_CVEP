@@ -70,7 +70,7 @@ N_PARTICIPANT = experiment_params['N_PARTICIPANT']
 
 # Sequence Parameters
 target_shape= SHAPES[-1]
-shape_change_time_sec = .250 # The duration (sec) between the occurrance of two different shapes
+shape_change_time_sec = .250 # The duration (sec) between the occurrence of two different shapes
 total_frames = int(TRIAL_TIME*FR) # Total frames within a trial    
 change_shapes = int(shape_change_time_sec*FR)  # The number of frames after which a new shape will appear inside the circle
 min_target_key_distance = 6*shape_change_time_sec # min inter-target distance in TIME (duration of 6 shapes)
@@ -87,17 +87,16 @@ with open(os.path.join(sequence_path,f'P{N_PARTICIPANT}_covert.json'), 'r') as f
 # load specific information about sequences and target info for both conditions
 
 # overt 
-overt_cued_sequences = np.array(overt_data['sequence_info']['cued_sequences'])
-overt_non_cued_sequences = np.array(overt_data['sequence_info']['non_cued_sequences'])
-overt_cued_target_counts = np.array(overt_data['target_count_info']['cued_target_counts'])
-overt_non_cued_target_counts = np.array(overt_data['target_count_info']['non_cued_target_counts'])
-
+overt_left_seq = np.array(overt_data['sequence_info']['left_sequences'])
+overt_right_seq = np.array(overt_data['sequence_info']['right_sequences'])
+overt_left_target_counts = np.array(overt_data['target_count_info']['left_target_counts'])
+overt_right_target_counts = np.array(overt_data['target_count_info']['right_target_counts'])
 
 # covert 
-covert_cued_sequences = np.array(covert_data['sequence_info']['cued_sequences'])
-covert_non_cued_sequences = np.array(covert_data['sequence_info']['non_cued_sequences'])
-covert_cued_target_counts = np.array(covert_data['target_count_info']['cued_target_counts'])
-covert_non_cued_target_counts = np.array(covert_data['target_count_info']['non_cued_target_counts'])
+covert_left_seq = np.array(overt_data['sequence_info']['left_sequences'])
+covert_right_seq = np.array(overt_data['sequence_info']['right_sequences'])
+covert_left_target_counts = np.array(overt_data['target_count_info']['left_target_counts'])
+covert_right_target_counts = np.array(overt_data['target_count_info']['right_target_counts'])
 
 # chosen code
 code = 'mgold_61_6521'
