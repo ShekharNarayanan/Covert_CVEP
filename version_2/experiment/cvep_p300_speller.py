@@ -163,7 +163,8 @@ class Keyboard(object):
             else:
                 self.outlet.push_sample(marker)  
 
-    def run(self, FR, left_sequence, right_sequence, All_Images, codes, duration, cued_side, shape_change_time_sec,start_marker=None, stop_marker=None):
+    
+    def run(self, FR, left_sequence, right_sequence, All_Images, codes, duration, cued_side, shape_change_time_sec,start_marker=None, stop_marker=None,sequence=True):
         """
         Present a trial with concurrent flashing for either of the circles.
         
@@ -191,153 +192,199 @@ class Keyboard(object):
                 Information used for logging
             
         """
-        initials_to_shapes = {'c': 'circle' , 'h' :'hour_glass', 'i': 'inverted_triangle', 't': 'triangle', 'r':'rectangle'}     
+        if sequence:
+            initials_to_shapes = {'c': 'circle' , 'h' :'hour_glass', 'i': 'inverted_triangle', 't': 'triangle', 'r':'rectangle'}     
 
-        # get images
-        stt_image = All_Images[0]
-        Dict_Images_left = All_Images[1]
-        Dict_Images_right = All_Images[2]
-        
-        # get the codes
-        code_left = codes['LEFT']
-        code_right = codes['RIGHT']
-        code_stt = codes["stt"]
-
-        change_frames = int(shape_change_time_sec * FR) # the number of frames after which the shapes will change during the trial
-   
-        # Set number of frames
-        if duration is None:        
-            n_frames = len(codes[list(codes.keys())[0]])            
-        else:            
-            n_frames = int(duration * FR)
-        
-        # disabling autodraw during code presentation
-        stt_image['stt'][0].setAutoDraw(False)
-        Dict_Images_left['r']['r'][0].setAutoDraw(False)
-        Dict_Images_right['i']['i'][0].setAutoDraw(False)
-                
-        # Send start marker
-        self.log(start_marker, on_flip=True)
-        
-        # using shape history of one of the circles to decide when to log them both (only one is needed because shapes on both sides change simultaneously)
-        prev_shape_left = ''
-        prev_shape_right  = ''
-        c_l = 0
-        c_r = 0
-        
-        # Loop frame flips
-        for i in range(n_frames): 
-
-            # Check quiting
-            if i % 60 == 0:
-                if self.is_quit():
-                    self.quit()                                        
-
-        
-            # Draw keys with color depending on code state
-            for name, _ in codes.items(): 
-
-                if name == 'stt':
-
-                    stt_image["stt"][code_stt[i % len(code_stt)]].draw()
+            # get images
+            stt_image = All_Images[0]
+            Dict_Images_left = All_Images[1]
+            Dict_Images_right = All_Images[2]
             
-            # left side has the cued shape sequence      
-                
-            if (i % (2*change_frames)) < change_frames: # logic for changing the shapes
+            # get the codes
+            code_left = codes['LEFT']
+            code_right = codes['RIGHT']
+            code_stt = codes["stt"]
+
+            change_frames = int(shape_change_time_sec * FR) # the number of frames after which the shapes will change during the trial
+
+            # Set number of frames
+            if duration is None:        
+                n_frames = len(codes[list(codes.keys())[0]])            
+            else:            
+                n_frames = int(duration * FR)
             
-                rem1 = i % (2*change_frames)
-
-                shape_left_side = left_sequence[int((i-rem1)/change_frames)]  
-                shape_right_side = right_sequence[int((i-rem1)/change_frames)]
-
-                # logic for logging the shapes on the screen
-                if (shape_left_side != prev_shape_left):
+            # disabling autodraw during code presentation
+            stt_image['stt'][0].setAutoDraw(False)
+            Dict_Images_left['r']['r'][0].setAutoDraw(False)
+            Dict_Images_right['i']['i'][0].setAutoDraw(False)
                     
-                    if cued_side == 'LEFT' and initials_to_shapes[shape_left_side] == 'hour_glass':
-                        target = 1
-                    else:
-                        target = 0
-                    self.log(["visual","cmd","left_shape_stim",json.dumps(f'shape={initials_to_shapes[shape_left_side]};target={target}')])
-                    prev_shape_left = shape_left_side
-                    c_l += 1
-                    print(f"log left {initials_to_shapes[shape_left_side]}")
-                    print(f"shape num left{c_l}")
-                
-                else:
-                    pass
-                    
-                if (shape_right_side != prev_shape_right):
-                    if cued_side == 'RIGHT' and initials_to_shapes[shape_right_side] == 'hour_glass':
-                        target = 1
-                        
-                    else:
-                        target = 0
-                        
-                    self.log(["visual","cmd","right_shape_stim",json.dumps(f'shape={initials_to_shapes[shape_right_side]};target={target}')])
-                    prev_shape_right = shape_right_side
-                    # c_r += 1
-                    # print(f"log right {initials_to_shapes[shape_right_side]}")
-                    # print(f"shape num right{c_r}")
-                    
-                else:
-                    pass
-                
-                Dict_Images_left[shape_left_side][shape_left_side][code_left[i % len(code_left)]].draw()                 
-                Dict_Images_right[shape_right_side][shape_right_side][code_right[i % len(code_right)]].draw()
-                
-            else:
+            # Send start marker
+            self.log(start_marker, on_flip=True)
             
-                rem2 = i%change_frames
-                
-                shape_left_side = left_sequence[int((i  - rem2)/change_frames)]
-                shape_right_side = right_sequence[int((i  - rem2)/change_frames)]                     
-                
-                if (shape_left_side != prev_shape_left):
-                    
-                    if cued_side == 'LEFT' and initials_to_shapes[shape_left_side] == 'hour_glass':
-                        target = 1
-                    else:
-                        target = 0
-                    self.log(["visual","cmd","left_shape_stim",json.dumps(f'shape={initials_to_shapes[shape_left_side]};target={target}')])
-                    prev_shape_left = shape_left_side
-                    # c_l += 1
-                    # print(f"log left {initials_to_shapes[shape_left_side]}")
-                    # print(f"shape num left{c_l}")
-                
-                else:
-                    pass
-                    
-                if (shape_right_side != prev_shape_right):
-                    if cued_side == 'RIGHT' and initials_to_shapes[shape_right_side] == 'hour_glass':
-                        target = 1
-                        
-                    else:
-                        target = 0
-                        
-                    self.log(["visual","cmd","right_shape_stim",json.dumps(f'shape={initials_to_shapes[shape_right_side]};target={target}')])
-                    prev_shape_right = shape_right_side
-                    # c_r += 1
-                    # print(f"log right {initials_to_shapes[shape_right_side]}")
-                    # print(f"shape num right{c_r}")
-                    
-                else:
-                    pass
-                
-                Dict_Images_left[shape_left_side][shape_left_side][code_left[i % len(code_left)]].draw()                 
-                Dict_Images_right[shape_right_side][shape_right_side][code_right[i % len(code_right)]].draw()
+            # using shape history of one of the circles to decide when to log them both (only one is needed because shapes on both sides change simultaneously)
+            prev_shape_left = ''
+            prev_shape_right  = ''
+            c_l = 0
+            c_r = 0
+            
+            # Loop frame flips
+            for i in range(n_frames): 
 
-            self.window.flip()  
+                # Check quiting
+                if i % 60 == 0:
+                    if self.is_quit():
+                        self.quit()                                        
+
+            
+                # Draw keys with color depending on code state
+                for name, _ in codes.items(): 
+
+                    if name == 'stt':
+
+                        stt_image["stt"][code_stt[i % len(code_stt)]].draw()
+                
+                # left side has the cued shape sequence      
+                    
+                if (i % (2*change_frames)) < change_frames: # logic for changing the shapes
+                
+                    rem1 = i % (2*change_frames)
+
+                    shape_left_side = left_sequence[int((i-rem1)/change_frames)]  
+                    shape_right_side = right_sequence[int((i-rem1)/change_frames)]
+
+                    # logic for logging the shapes on the screen
+                    if (shape_left_side != prev_shape_left):
+                        
+                        if cued_side == 'LEFT' and initials_to_shapes[shape_left_side] == 'hour_glass':
+                            target = 1
+                        else:
+                            target = 0
+                        self.log(["visual","cmd","left_shape_stim",json.dumps(f'shape={initials_to_shapes[shape_left_side]};target={target}')])
+                        prev_shape_left = shape_left_side
+                        c_l += 1
+                        print(f"log left {initials_to_shapes[shape_left_side]}")
+                        print(f"shape num left{c_l}")
+                    
+                    else:
+                        pass
+                        
+                    if (shape_right_side != prev_shape_right):
+                        if cued_side == 'RIGHT' and initials_to_shapes[shape_right_side] == 'hour_glass':
+                            target = 1
+                            
+                        else:
+                            target = 0
+                            
+                        self.log(["visual","cmd","right_shape_stim",json.dumps(f'shape={initials_to_shapes[shape_right_side]};target={target}')])
+                        prev_shape_right = shape_right_side
+                        # c_r += 1
+                        # print(f"log right {initials_to_shapes[shape_right_side]}")
+                        # print(f"shape num right{c_r}")
+                        
+                    else:
+                        pass
+                    
+                    Dict_Images_left[shape_left_side][shape_left_side][code_left[i % len(code_left)]].draw()                 
+                    Dict_Images_right[shape_right_side][shape_right_side][code_right[i % len(code_right)]].draw()
+                    
+                else:
+                
+                    rem2 = i%change_frames
+                    
+                    shape_left_side = left_sequence[int((i  - rem2)/change_frames)]
+                    shape_right_side = right_sequence[int((i  - rem2)/change_frames)]                     
+                    
+                    if (shape_left_side != prev_shape_left):
+                        
+                        if cued_side == 'LEFT' and initials_to_shapes[shape_left_side] == 'hour_glass':
+                            target = 1
+                        else:
+                            target = 0
+                        self.log(["visual","cmd","left_shape_stim",json.dumps(f'shape={initials_to_shapes[shape_left_side]};target={target}')])
+                        prev_shape_left = shape_left_side
+                        # c_l += 1
+                        # print(f"log left {initials_to_shapes[shape_left_side]}")
+                        # print(f"shape num left{c_l}")
+                    
+                    else:
+                        pass
+                        
+                    if (shape_right_side != prev_shape_right):
+                        if cued_side == 'RIGHT' and initials_to_shapes[shape_right_side] == 'hour_glass':
+                            target = 1
+                            
+                        else:
+                            target = 0
+                            
+                        self.log(["visual","cmd","right_shape_stim",json.dumps(f'shape={initials_to_shapes[shape_right_side]};target={target}')])
+                        prev_shape_right = shape_right_side
+                        # c_r += 1
+                        # print(f"log right {initials_to_shapes[shape_right_side]}")
+                        # print(f"shape num right{c_r}")
+                        
+                    else:
+                        pass
+                    
+                    Dict_Images_left[shape_left_side][shape_left_side][code_left[i % len(code_left)]].draw()                 
+                    Dict_Images_right[shape_right_side][shape_right_side][code_right[i % len(code_right)]].draw()
+
+                self.window.flip()  
+
+            # Send stop markers
+            self.log(stop_marker)
+            
+
+            # set autodraw to true to keep stt visible
+            stt_image['stt'][0].setAutoDraw(True)
+            Dict_Images_left['r']['r'][0].setAutoDraw(True)
+            Dict_Images_right['i']['i'][0].setAutoDraw(True)
+            
+            self.window.flip()
+            
+        else:
+            stt_image_bottom = All_Images[0]
+            stt_image_top = All_Images[1]
+            shape_im = All_Images[2]
+
+            
+        #     # set auto draw to false 
+            stt_image_bottom['stt_bottom'][0].setAutoDraw(False)
+            stt_image_top['stt_top'][0].setAutoDraw(False)
+            shape_im['shape'][0].setAutoDraw(False)
+            
+            if duration is None:        
+                n_frames = len(codes[list(codes.keys())[0]])            
+            else:            
+                n_frames = int(duration * FR)
+            # Send start marker
+            self.log(start_marker, on_flip=True)
+            
+            for i in range(n_frames):
+                # Check quiting
+                if i % 60 == 0:
+                    if self.is_quit():
+                        self.quit()
+
+        #     # Draw keys with color depending on code state
+            
+                for name, code in codes.items():
+                    if name =='stt_bottom':
+                        stt_image_bottom[name][code[i % len(code)]].draw()
+                    elif name == 'stt_top':
+                        stt_image_top[name][code[i % len(code)]].draw()
+                    else:
+                        shape_im[name][code[i % len(code)]].draw()
+                self.window.flip()       
+                    
+            stt_image_bottom['stt_bottom'][0].setAutoDraw(True)
+            stt_image_top['stt_top'][0].setAutoDraw(True)
+            shape_im['shape'][0].setAutoDraw(True)
+                    
+            
 
         # Send stop markers
         self.log(stop_marker)
-        
-
-        # set autodraw to true to keep stt visible
-        stt_image['stt'][0].setAutoDraw(True)
-        Dict_Images_left['r']['r'][0].setAutoDraw(True)
-        Dict_Images_right['i']['i'][0].setAutoDraw(True)
-        
-        self.window.flip()
+            
         
     
     
