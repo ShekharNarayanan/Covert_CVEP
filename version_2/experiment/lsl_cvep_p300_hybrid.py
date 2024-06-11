@@ -1,5 +1,4 @@
 """
-5HJCBGOEERDU54ZQQ6URTYYCLE
 @author: Shekhar Narayanan (shekharnarayanan833@gmail.com), Jordy Thielen* (jordy.thielen@donders.ru.nl)
 *:corresponding author
 
@@ -177,6 +176,9 @@ if code == "onoff":
     codes["stt"] = [1, 0]
 else:
     codes["stt"] = [1] + [0] * int((1 + TRIAL_TIME) * FR)
+
+# logging codes
+keyboard.log(marker = ["visual","param","codes",json.dumps(codes)])
 
 # #---------------------------------------------------------------
 # # Experiment
