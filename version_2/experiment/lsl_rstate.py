@@ -33,8 +33,8 @@ STREAM = experiment_params['STREAM'] # stream LSL data
 SCREEN = experiment_params['SCREEN'] # which screen to use, set to 0 for no projection
 
 # change  HOME to LAB to run script on different monitor specifications, see config file
-SCREEN_SIZE = eval(experiment_params['SCREEN_SIZE_HOME_PC'])# resolution of the monitor 
-SCREEN_WIDTH = experiment_params['SCREEN_WIDTH_HOME_PC']  # width of the monitor in cm
+SCREEN_SIZE = eval(experiment_params['SCREEN_SIZE_LAB_PC'])# resolution of the monitor 
+SCREEN_WIDTH = experiment_params['SCREEN_WIDTH_LAB_PC']  # width of the monitor in cm
 SCREEN_DISTANCE = experiment_params['SCREEN_DISTANCE'] # distance at which the participant is seated
 SCREEN_COLOR = eval(experiment_params['SCREEN_COLOR']) # background color of the screen
 FR = experiment_params['FR']  # screen frame rate
@@ -43,8 +43,6 @@ PR = experiment_params['PR']  # codes presentation rate
 # height and width of the stimulus timing tracker (STT) on the top left of the screen -- remove the bottom
 STT_TOP_WIDTH = 3
 STT_TOP_HEIGHT = 3
-# STT_BOTTOM_WIDTH = 1.0
-# STT_BOTTOM_HEIGHT = 1.8
 
 TEXT_FIELD_HEIGHT = experiment_params['TEXT_FIELD_HEIGHT'] # width of the text field
 
