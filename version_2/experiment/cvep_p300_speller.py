@@ -342,6 +342,7 @@ class Keyboard(object):
             self.window.flip()
             
         else:
+            # a simpler version of the run function for running the resting state script
             stt_image_top = All_Images[0]
             shape_im = All_Images[1]
 
