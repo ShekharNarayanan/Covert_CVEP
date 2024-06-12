@@ -342,13 +342,11 @@ class Keyboard(object):
             self.window.flip()
             
         else:
-            stt_image_bottom = All_Images[0]
-            stt_image_top = All_Images[1]
-            shape_im = All_Images[2]
+            stt_image_top = All_Images[0]
+            shape_im = All_Images[1]
 
             
-        #     # set auto draw to false 
-            stt_image_bottom['stt_bottom'][0].setAutoDraw(False)
+            # set auto draw to false 
             stt_image_top['stt_top'][0].setAutoDraw(False)
             shape_im['shape'][0].setAutoDraw(False)
             
@@ -368,15 +366,13 @@ class Keyboard(object):
         #     # Draw keys with color depending on code state
             
                 for name, code in codes.items():
-                    if name =='stt_bottom':
-                        stt_image_bottom[name][code[i % len(code)]].draw()
-                    elif name == 'stt_top':
+                    if name == 'stt_top':
                         stt_image_top[name][code[i % len(code)]].draw()
                     else:
                         shape_im[name][code[i % len(code)]].draw()
                 self.window.flip()       
                     
-            stt_image_bottom['stt_bottom'][0].setAutoDraw(True)
+            # stt_image_bottom['stt_bottom'][0].setAutoDraw(True)
             stt_image_top['stt_top'][0].setAutoDraw(True)
             shape_im['shape'][0].setAutoDraw(True)
                     

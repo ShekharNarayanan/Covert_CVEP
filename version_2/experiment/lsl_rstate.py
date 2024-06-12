@@ -40,11 +40,11 @@ SCREEN_COLOR = eval(experiment_params['SCREEN_COLOR']) # background color of the
 FR = experiment_params['FR']  # screen frame rate
 PR = experiment_params['PR']  # codes presentation rate
 
-# height and width of the stimulus timing tracker (STT) on the top left of the screen
-STT_TOP_WIDTH = 3.5
-STT_TOP_HEIGHT = 2.2
-STT_BOTTOM_WIDTH = 1.0
-STT_BOTTOM_HEIGHT = 1.8
+# height and width of the stimulus timing tracker (STT) on the top left of the screen -- remove the bottom
+STT_TOP_WIDTH = 3
+STT_TOP_HEIGHT = 3
+# STT_BOTTOM_WIDTH = 1.0
+# STT_BOTTOM_HEIGHT = 1.8
 
 TEXT_FIELD_HEIGHT = experiment_params['TEXT_FIELD_HEIGHT'] # width of the text field
 
@@ -76,14 +76,8 @@ stt_images = [os.path.join(images_path,f'{color}.png') for color in ['black','wh
 # Add stimulus timing tracker at left top of the screen
 x_pos = -SCREEN_SIZE[0] / 2 + STT_TOP_WIDTH / 2 * ppd
 y_pos = SCREEN_SIZE[1] / 2 - STT_TOP_HEIGHT / 2 * ppd
-# images = ["images/black.png", "images/white.png"]
 stt_top_image = keyboard.image_selector("stt_top", (STT_TOP_WIDTH * ppd, STT_TOP_HEIGHT * ppd), (x_pos,y_pos), stt_images, auto_draw = True)
 
-# Add stimulus timing tracker at right bottom of the screen
-x_pos = SCREEN_SIZE[0] / 2 - STT_BOTTOM_WIDTH / 2 * ppd
-y_pos = -SCREEN_SIZE[1] / 2 + STT_BOTTOM_HEIGHT / 2 * ppd
-# images = ["images/black.png", "images/white.png"]
-stt_bottom_image = keyboard.image_selector("stt_bottom", (STT_BOTTOM_WIDTH * ppd, STT_BOTTOM_HEIGHT * ppd), (x_pos,y_pos), stt_images, auto_draw = True)
 
 # Add text field at the top of the screen
 x_pos = STT_TOP_WIDTH * ppd
@@ -100,7 +94,6 @@ shape_im = keyboard.image_selector("shape", (CIRCLE_WIDTH * ppd, CIRCLE_HEIGHT *
 codes = dict()
 codes["shape"] = [1]
 codes["stt_top"] = [1] + [0] * int(FR * (TRIAL_TIME + 1))
-codes["stt_bottom"] = [1, 0]
 
 
 
@@ -122,7 +115,7 @@ core.wait(5)
 
 
 # Trial
-All_Images = [stt_bottom_image, stt_top_image,shape_im]
+All_Images = [stt_top_image,shape_im]
 print("Started")
 keyboard.run(FR = FR, 
                      left_sequence= None, 
@@ -132,13 +125,10 @@ keyboard.run(FR = FR,
                      duration= TRIAL_TIME, 
                      cued_side= None, 
                      shape_change_time_sec= None,
-                     start_marker= ["visual", "cmd", "start_trials", ""],
-                     stop_marker= ["visual", "cmd", "stop_trials", ""],
+                     start_marker= ["visual", "cmd", "start_trial", ""],
+                     stop_marker= ["visual", "cmd", "stop_trial", ""],
                      sequence=False)
 
-# keyboard.run(codes, TRIAL_TIME, 
-#     start_marker=["visual", "cmd", "start_trial", ""], 
-#     stop_marker=["visual", "cmd", "stop_trial", ""])
 print("Stopped")
 
 # Wait for stop
@@ -149,3 +139,15 @@ print("Waiting for researcher to stop")
 event.waitKeys()
 print("Stopped")
 keyboard.quit()
+
+# naming condition 
+# task-rstate_open run-001
+# task-rstate_closed run-001
+# task-practice run-001
+# task-covert run-001
+# task-covert run-002
+# task-covert run-003
+# task-covert run-004
+# task-overt run-001
+# task-rstate_open run-002
+# task-rstate_closed run-002
