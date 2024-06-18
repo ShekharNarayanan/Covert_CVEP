@@ -28,6 +28,14 @@ with open(os.path.join(project_path,'config.yml'), "r") as yaml_file:
     
 experiment_params = config_data['experimental_params']
 
+# check for practice block
+PRACTICE = easygui.enterbox("Is this a practice block?")
+
+if PRACTICE in ['Yes','yes','True', 'true']:
+    PRACTICE = True    
+else:
+    PRACTICE = False
+
 STREAM = experiment_params['STREAM'] # stream LSL data
 SCREEN = experiment_params['SCREEN'] # which screen to use, set to 0 for no projection
 
@@ -63,7 +71,10 @@ FEEDBACK_TIME = experiment_params['FEEDBACK_TIME']
 ITI_TIME = experiment_params['ITI_TIME'] # inter trial interval
 
 # number of trials 
-N_TRIALS = experiment_params['N_TRIALS']
+if PRACTICE:
+    N_TRIALS = 5
+else:
+    N_TRIALS = experiment_params['N_TRIALS']
 
 # participant number
 N_PARTICIPANT = experiment_params['N_PARTICIPANT']
@@ -204,7 +215,11 @@ run_4 = np.random.permutation(run_3)
 run_5 = np.random.permutation(run_4)
 
 # concatenating all runs (helps with indexing in the loop below)
-runs = np.vstack((run_1,run_2,run_3, run_4,run_5))
+if PRACTICE:
+    runs = run_1.reshape(1,5)
+    
+else:
+    runs = np.vstack((run_1,run_2,run_3, run_4,run_5))
 
 # #  loop through runs
 for run_i in range(runs.shape[0]): 
@@ -216,7 +231,7 @@ for run_i in range(runs.shape[0]):
     keyboard.set_field_text("text", "")
     
     # current run and trial range   
-    run_current = runs[run_i,:]
+    run_current = runs[run_i]
     trial_range = range(run_i*N_TRIALS, (run_i+1)*N_TRIALS)
     
     run_accuracy_vec = np.zeros((N_TRIALS)) # accuracy vector storing the responses of the subject
