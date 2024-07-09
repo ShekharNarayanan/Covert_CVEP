@@ -27,6 +27,13 @@ Scripts used to analyze EEG and eyetracking data.
 4. **eye_tracker_analysis.ipynb**: jupyter notebook for analzying eye tracking data from the experiment.
 5. **plot_p300.ipynb**: jupyter notebook for visualizing the p300 response from the collected EEG activity.
 
+# Setup and installation
+To install the required dependencies, run:
+
+```bash
+pip install -r answers/requirements.txt
+
+
 
 
 
