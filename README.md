@@ -17,9 +17,14 @@ The scripts used to generate the stimuli, shape sequences and the overall experi
 2. **r_state.py**: the resting state script with only the fixation cross. Runs for 2 minutes. The experiment starts and ends with this script (2 minutes eyes open, 2 minutes eyes closed).
 3. **lsl_cvep_p300_hybrid.py**: this script is used for presentation of the stimuli during the experiment. Parameters corresponding to monitor used, resolution, frame rate etc. from the config file are used here.
 4. **cvep_p300_speller.py**: this script runs has the main keyboard class used in the lsl_cvep_p300_hybrid.py script.
-5. **sequence_generation.py**: this jupyter notebook shows the process and criteria for generating the shape sequences used in the experiment.
+5. **sequence_generation.ipynb**: this jupyter notebook shows the process and criteria for generating the shape sequences used in the experiment.
 
-## Analysis
+## Analysis:
+1. **read_and_preprocess_data.py**: loads the raw xdf files for the recorded EEG activity and preprocesss them. First step of the preliminary analysis.
+2. **analyze_data.ipynb**: jupyter notebook for analyzing the preprocessed data. Performs classification using the rcca pipeline and stores the results. (see this [paper] (https://scholar.google.nl/citations?view_op=view_citation&hl=nl&user=eETiv1sAAAAJ&citation_for_view=eETiv1sAAAAJ:ufrVoPGSRksC)). Second step of the preliminary analysis
+3. **plot_results.ipynb**: jupyter notebook for visualizing the results from the analyzed data. Shows the variation of classification accuracy for different transient response lengths, over all classification accuracy along with the spatial filters and transient response curves. Last step of the preliminary analysis.
+4. **eye_tracker_analysis.ipynb**: jupyter notebook for analzying eye tracking data from the experiment.
+5. **plot_p300.ipynb**: jupyter notebook for visualizing the p300 response from the collected EEG activity.
 
 
 
