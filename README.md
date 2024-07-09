@@ -31,7 +31,7 @@ Scripts used to analyze EEG and eyetracking data.
 To install the required dependencies, run:
 
 ```bash
-pip install -r answers/requirements.txt
+pip install -r requirements.txt
 
 
 
