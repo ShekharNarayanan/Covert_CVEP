@@ -22,7 +22,7 @@ The scripts used to generate the stimuli, shape sequences and the overall experi
 ## Analysis:
 Scripts used to analyze EEG and eyetracking data.
 1. **read_and_preprocess_data.py**: loads the raw xdf files for the recorded EEG activity and preprocesss them. First step of the preliminary analysis.
-2. **analyze_data.ipynb**: jupyter notebook for analyzing the preprocessed data. Performs classification using the rcca pipeline and stores the results. (see this [paper] (https://scholar.google.nl/citations?view_op=view_citation&hl=nl&user=eETiv1sAAAAJ&citation_for_view=eETiv1sAAAAJ:ufrVoPGSRksC)). Second step of the preliminary analysis
+2. **analyze_data.ipynb**: jupyter notebook for analyzing the preprocessed data. Performs classification using the rcca pipeline and stores the results. (see this [paper]([https://arxiv.org/pdf/2404.00031](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0133797)). Second step of the preliminary analysis
 3. **plot_results.ipynb**: jupyter notebook for visualizing the results from the analyzed data. Shows the variation of classification accuracy for different transient response lengths, over all classification accuracy along with the spatial filters and transient response curves. Last step of the preliminary analysis.
 4. **eye_tracker_analysis.ipynb**: jupyter notebook for analzying eye tracking data from the experiment.
 5. **plot_p300.ipynb**: jupyter notebook for visualizing the p300 response from the collected EEG activity.
