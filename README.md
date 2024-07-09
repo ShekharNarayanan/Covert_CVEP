@@ -13,7 +13,7 @@ Contents: Different versions contain the various stages of the experimental para
 Each version (version_2 being the most up to date) contains an experiment and an analysis folder. 
 ## Experiment:
 The scripts used to generate the stimuli, shape sequences and the overall experiment contents are located inside the experiment folder.
-1. **experiment\eyelink\lsl_eylink.py**: the script used for calibration and validation of eye tracking activity. It is used before the experiment begins.
+1. **\eyelink\lsl_eylink.py**: the script used for calibration and validation of eye tracking activity. It is used before the experiment begins.
 2. **r_state.py**: the resting state script with only the fixation cross. Runs for 2 minutes. The experiment starts and ends with this script (2 minutes eyes open, 2 minutes eyes closed).
 3. **lsl_cvep_p300_hybrid.py**: this script is used for presentation of the stimuli during the experiment. Parameters corresponding to monitor used, resolution, frame rate etc. from the config file are used here.
 4. **cvep_p300_speller.py**: this script runs has the main keyboard class used in the lsl_cvep_p300_hybrid.py script.
