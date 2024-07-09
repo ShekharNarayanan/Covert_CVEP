@@ -10,7 +10,7 @@ Contents: Different versions contain the various stages of the experimental para
 3. **version 2**: The most upto date script for the experiment will be found in version 2. The experiment consists of parallelly flashing stimuli containing 5 different shapes. The analysis folder now contains analyses for eye tracking data.
 
 # Usage:
-Each version (version_2 being the most up to date) contains an experiment and an analysis folder. 
+Each version (version_2 being the most up to date) contains an experiment and an analysis folder. For usage of specific versions, please refer to their respective readme.md file.
 ## Experiment:
 The scripts used to generate the stimuli, shape sequences and the overall experiment contents are located inside the experiment folder.
 1. **\eyelink\lsl_eylink.py**: the script used for calibration and validation of eye tracking activity. It is used before the experiment begins.
