@@ -11,6 +11,7 @@ from cvep_p300_speller import Keyboard
 from psychopy import event, core
 import yaml
 import pickle
+import easygui
 
 
 #---------------------------------------------------------------
@@ -137,7 +138,7 @@ y_pos = SCREEN_SIZE[1] / 2 - TEXT_FIELD_HEIGHT * ppd / 2
 keyboard.add_text_field("text", "", (SCREEN_SIZE[0] - STT_WIDTH * ppd, TEXT_FIELD_HEIGHT * ppd), (x_pos, y_pos), (0, 0, 0), (-1, -1, -1))
 
 # Add fixation/cue text field
-keyboard.add_text_field("fix", "", ((3 * ppd, 3 * ppd)), (0,0), (0, 0, 0), (-1, -1, -1), auto_draw=True)
+keyboard.add_text_field("fix", "", ((3 * ppd, 3 * ppd)), (0,0), (0, 0, 0), (-1, -1, -1), auto_draw=True,alignment="center")
 keyboard.set_field_text("fix", "+")
 
 #Circle Positions
@@ -197,7 +198,7 @@ keyboard.log(marker = ["visual","param","codes",json.dumps(codes)])
 
 # Wait for start    
 keyboard.set_field_text("text", "")
-keyboard.set_field_text("text", "Press button to start.")
+keyboard.set_field_text("text", "Waiting for researcher to start")
 print("Press button to start.")
 event.waitKeys(keyList=["c"])
 
@@ -227,8 +228,9 @@ for run_i in range(runs.shape[0]):
     #start of run
     keyboard.log(marker = ["visual","cmd","start_run",json.dumps(1+run_i)])
     keyboard.set_field_text("text", "Starting...")
-    core.wait(1, hogCPUperiod= 0.2)
+    core.wait(4, hogCPUperiod= 0.2)
     keyboard.set_field_text("text", "")
+    core.wait(1, hogCPUperiod= 0.2)
     
     # current run and trial range   
     run_current = runs[run_i]
@@ -303,11 +305,10 @@ for run_i in range(runs.shape[0]):
         keyboard.window.flip() 
         
         # Wait response
-        response = ''
         timer = core.CountdownTimer(RESPONSE_TIME)
         response = ''
-        #log response start
         keyboard.log(marker = ["visual","cmd","start_response",""]) 
+        event.clearEvents()
         while timer.getTime() > 0:                       
             key = event.getKeys(keyList=["return", "backspace", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "num_1", "num_2", "num_3", "num_4", "num_5", "num_6", "num_7", "num_8", "num_9", "num_0"])
             
@@ -365,7 +366,7 @@ for run_i in range(runs.shape[0]):
     run_acc_perc = (run_accuracy_vec).sum()/len(run_accuracy_vec)*100 
     keyboard.log(["visual", "param", "run_accuracy", json.dumps(run_acc_perc)])       
     keyboard.set_field_text("fix", f'{run_acc_perc:.0f}%') 
-    keyboard.set_field_text("text", "Press any key to start the next run")  
+    keyboard.set_field_text("text", "Waiting for researcher to continue")  
     event.waitKeys(keyList=["c"])
     keyboard.set_field_text("fix", "+") 
     keyboard.set_field_text("text", "") 

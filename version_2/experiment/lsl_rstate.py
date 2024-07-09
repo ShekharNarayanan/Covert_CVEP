@@ -21,8 +21,8 @@ import yaml
 #---------------------------------------------------------------
 
 # path to the project, shape sequences and the images used
-project_path = r'C:\Users\s1081686\Desktop\RA_Project\Scripts\pynt_codes\version_2'
-images_path = os.path.join(project_path,'experiment_version_2','images')
+project_path = r'D:\Users\bci\Covert_CVEP\experiment_v2'
+images_path = os.path.join(project_path,'images')
 
 with open(os.path.join(project_path,'config.yml'), "r") as yaml_file:
     config_data = yaml.safe_load(yaml_file)
@@ -37,7 +37,7 @@ SCREEN_SIZE = eval(experiment_params['SCREEN_SIZE_LAB_PC'])# resolution of the m
 SCREEN_WIDTH = experiment_params['SCREEN_WIDTH_LAB_PC']  # width of the monitor in cm
 SCREEN_DISTANCE = experiment_params['SCREEN_DISTANCE'] # distance at which the participant is seated
 SCREEN_COLOR = eval(experiment_params['SCREEN_COLOR']) # background color of the screen
-FR = experiment_params['FR']  # screen frame rate
+FR = experiment_params['FR_LAB']  # screen frame rate
 PR = experiment_params['PR']  # codes presentation rate
 
 # height and width of the stimulus timing tracker (STT) on the top left of the screen -- remove the bottom
@@ -110,7 +110,7 @@ keyboard.log(marker=["visual", "cmd", "start_run", ""])
 keyboard.set_field_text("text", "Starting")
 print("Starting")
 core.wait(5)
-
+keyboard.set_field_text("text", "")
 
 # Trial
 All_Images = [stt_top_image,shape_im]

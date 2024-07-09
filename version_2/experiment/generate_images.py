@@ -30,7 +30,7 @@ def makeRectangle(l, w, theta, offset=(0,0)):
 
 def crop_image(img, mask_radius=3):
     """
-    Crop the image using a circular mask
+    Crop the image using a circular mask 
 
     Args:
         img (PIL image object): Image before the cropping
@@ -42,11 +42,12 @@ def crop_image(img, mask_radius=3):
     draw.ellipse((0, 0) + bigsize, fill=255)
     mask = mask.resize(img.size, resample= Image.ANTIALIAS)
     img.putalpha(mask)
-    
+
+        
     return img
 
 
-path = r'C:\Users\s1081686\Desktop\RA_Project\Scripts\pynt_codes\SN_experiment\experiment_version_2\images' # save images here
+path = r'D:\Users\bci\Covert_CVEP\experiment_v2\images' # save images here
 os.makedirs(path, exist_ok=True)
 
 # image specifications
@@ -82,7 +83,7 @@ for key_i in range(len(shapes)):
             img_draw.polygon(rect, fill=text_col)
             img  = ImageEnhance.Brightness(img).enhance(1.5)
             img = crop_image(img)
-            img.save(os.path.join(path, f"{key}_{color}.png"))
+            img.save(os.path.join(path, f"{key}_{color}.png"), quality = 99)
             
         elif key_i ==1: # circle
             x = width/2
@@ -94,21 +95,21 @@ for key_i in range(len(shapes)):
             img_draw.ellipse(twoPointList, fill= text_col)
             img  = ImageEnhance.Brightness(img).enhance(1.5) # enhance brightness to 150%
             img = crop_image(img)
-            img.save(os.path.join(path, f"{key}_{color}.png"))
+            img.save(os.path.join(path, f"{key}_{color}.png"), quality = 99)
             
         elif key_i == 2: #inverted triangle
             
             img_draw.polygon([(x_pos- text_width/2, y_pos),(x_pos + 3/2*text_width, y_pos ) , (width/2, height/2 + text_height/2)], fill=text_col)  
             img  = ImageEnhance.Brightness(img).enhance(1.5)
             img = crop_image(img)
-            img.save(os.path.join(path, f"{key}_{color}.png"))
+            img.save(os.path.join(path, f"{key}_{color}.png"), quality = 99)
             
         elif key_i == 3: #triangle
             
             img_draw.polygon([(x_pos - text_width/2, y_pos + text_height),(x_pos + 3/2*text_width, y_pos + text_height) , (width/2, height/2 - text_height/2)], fill=text_col)   
             img  = ImageEnhance.Brightness(img).enhance(1.5) 
             img = crop_image(img)
-            img.save(os.path.join(path, f"{key}_{color}.png"))
+            img.save(os.path.join(path, f"{key}_{color}.png"), quality = 99)
              
             
         elif key_i ==4: # hourglass
@@ -117,7 +118,7 @@ for key_i in range(len(shapes)):
             img_draw.polygon([(x_pos- text_width/2, y_pos + text_height),(x_pos + 3/2*text_width, y_pos + text_height) , (width/2, height/2)], fill=text_col) # lower triangle
             img  = ImageEnhance.Brightness(img).enhance(1.5)
             img = crop_image(img)
-            img.save(os.path.join(path, f"{key}_{color}.png"))
+            img.save(os.path.join(path, f"{key}_{color}.png"), quality = 99)
 
 # No shapes, just images with a black or white background
 for color in background_colors:

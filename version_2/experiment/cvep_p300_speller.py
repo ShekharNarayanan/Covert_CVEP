@@ -113,7 +113,7 @@ class Keyboard(object):
         
        
 
-    def add_text_field(self, name, text, size, pos, field_color=(0, 0, 0), text_color=(-1, -1, -1), auto_draw = True, font = 'Courier New'):
+    def add_text_field(self, name, text, size, pos, field_color=(0, 0, 0), text_color=(-1, -1, -1), auto_draw = True, font = 'Courier New',alignment="left"):
         """
         Add a text field to the keyboard.
 
@@ -134,7 +134,7 @@ class Keyboard(object):
         # assert name not in self.fields, "Trying to add a text field with a name that already extists!"
         self.fields[name] =  visual.TextBox2(win=self.window, text=text, font=font, 
             units="pix", pos=pos, size=size, letterHeight=0.5*size[1], 
-            color=text_color, fillColor=field_color, alignment="left", 
+            color=text_color, fillColor=field_color, alignment=alignment, 
             autoDraw=auto_draw, autoLog=False)
         
         return self.fields[name]
