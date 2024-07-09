@@ -11,13 +11,17 @@ import mne
 from mnelab.io import read_raw
 import easygui
 import pyntbci
+from matplotlib.backends.backend_pdf import PdfPages
+import matplotlib.pyplot as plt
 
 # paths
-data_path = r'C:\Users\s1081686\Desktop\RA_Project\Scripts\pynt_codes\version_2\experiment_version_2\data_full_experiment' # path for raw data
-codes_path = r'C:\Users\s1081686\Desktop\RA_Project\Scripts\pynt_codes\version_2\experiment_version_2\codes'
+exp_path = r'C:\Users\s1081686\Desktop\RA_Project\Scripts\pynt_codes\version_2\experiment_version_2'
+data_path = os.path.join(exp_path,'data_full_experiment') # path for raw data
+codes_path = os.path.join(exp_path,'codes')
+ica_path = os.path.join(exp_path,'ica_images')
 
 
-# subject and session
+# subject and sessio
 subjects = [f"VPpdi{letter}" for letter in 'abcdef'] # subject names
 ses = "ses-S001"
 
@@ -122,17 +126,46 @@ for i_subject, subject in enumerate(subjects):
             print("shape of ica matrix",ica.shape)
             
             # plotting ICA results
-            ica_obj.plot_sources(raw)
-            ica_obj.plot_components(picks = None, show = True, inst = raw)# what does this actually show????
-            
+            src = ica_obj.plot_sources(raw)
+            comp = ica_obj.plot_components(picks = None, show = True, inst = raw)# what does this actually show????
+
             # Applying ICA results to raw data and removing noisy components
             if i_run == 0: # check only the components for the first run per condition. For the rest of the runs, these components are automatically removed
                 exclude_vec_str = easygui.enterbox("Enter the component(s) you would like to exclude with a space between them. For example: 1 2 3")
                 vector_list =  [int(x) for x in exclude_vec_str.split()]
                 
             ica_obj.exclude = vector_list
+            
+            # save removed components as images
+            components_per_page = 5
+            with PdfPages(os.path.join(ica_path,f'excluded_ica_components_{subject}.pdf')) as pdf:
+                n_excluded_components = len(vector_list)
+                n_pages = (n_excluded_components + components_per_page - 1) // components_per_page
+                
+                for page in range(n_pages):
+                    start_idx = page * components_per_page
+                    end_idx = min(start_idx + components_per_page, n_excluded_components)
+                    actual_components_per_page = end_idx - start_idx
+                    
+                    fig, axes = plt.subplots(nrows=actual_components_per_page, ncols=1, figsize=(8.27, 11.69))  # A4 size in inches
+                    
+                    if actual_components_per_page == 1:
+                        axes = [axes]  # Ensure axes is iterable
+                    
+                    for i, ax in enumerate(axes):
+                        component_index = vector_list[start_idx + i]
+                        ica_obj.plot_components(picks=[component_index], axes=ax, show=False, inst=raw)
+                        ax.set_title(f'Excluded ICA Component {component_index}')
+                    
+                    pdf.savefig(fig)
+                    plt.close(fig)  # Close the figure after saving to the PDF
+
+            print("Excluded ICA component plots saved to excluded_ica_components.pdf")
+            
+            print("type ica obj.exclude",type(ica_obj.exclude))
             ica_obj.apply(raw) 
- 
+    
+            
             # Extract labels from marker stream
             streams = pyxdf.load_xdf(fn)[0]
             names = [stream["info"]["name"][0] for stream in streams]
