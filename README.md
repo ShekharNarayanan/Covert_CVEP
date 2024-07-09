@@ -16,7 +16,7 @@ The scripts used to generate the stimuli, shape sequences and the overall experi
 1. **lsl_eylink.py**: the script used for calibration and validation of eye tracking activity. It is used before the experiment begins.
 2. **r_state.py**: the resting state script with only the fixation cross. Runs for 2 minutes. The experiment starts and ends with this script (2 minutes eyes open, 2 minutes eyes closed).
 3. **lsl_cvep_p300_hybrid.py**: this script is used for presentation of the stimuli during the experiment. Parameters corresponding to monitor used, resolution, frame rate etc. from the config file are used here.
-4. **cvep_p300_speller.py**: this script runs has the main keyboard object used in the lsl_cvep_p300_hybrid.py script.
+4. **cvep_p300_speller.py**: this script runs has the main keyboard class used in the lsl_cvep_p300_hybrid.py script.
 5. **sequence_generation.py**: this jupyter notebook shows the process and criteria for generating the shape sequences used in the experiment.
 
 ## Analysis
