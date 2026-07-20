@@ -1,0 +1,11 @@
+[project]
+name = "covert-cvep"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "psychopy>=2026.2.1",
+    "pylsl>=1.18.2",
+    "pyntbci>=1.8.3",
+]
