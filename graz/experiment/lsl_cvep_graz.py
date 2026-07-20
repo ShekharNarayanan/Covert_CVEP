@@ -5,23 +5,26 @@
 Python script for displaying the stimulus paradigm
 """
 
-import os, json
+import os
+import json
 import numpy as np
 from cvep_speller_graz import Keyboard
 from psychopy import event, core
 import random
 import yaml
 from sequence_generation import sequence_generator, targets_in_trial
+from pathlib import Path
 
 #---------------------------------------------------------------
 # Parameters
 #---------------------------------------------------------------
 
 # path to the project and the images used
-project_path = r'C:\Users\s1081686\Desktop\RA_Project\graz_conference'
-images_path = os.path.join(project_path,'experiment','images')
+SCRIPT_DIR = Path(__file__).resolve().parent
+PROJECT_PATH = SCRIPT_DIR.parent #r'C:\Users\s1081686\Desktop\RA_Project\graz_conference'
+IMAGES_PATH = os.path.join(PROJECT_PATH,'experiment','images')
 
-with open(os.path.join(project_path,'config.yml'), "r") as yaml_file:
+with open(os.path.join(PROJECT_PATH,'config.yml'), "r") as yaml_file:
     config_data = yaml.safe_load(yaml_file)
     
 experiment_params = config_data['experimental_params']
@@ -89,7 +92,7 @@ x_pos = -SCREEN_SIZE[0] / 2 + STT_WIDTH / 2 * ppd
 y_pos = SCREEN_SIZE[1] / 2 - STT_HEIGHT / 2 * ppd
 
 # get black and white images for stt
-images_stt = [os.path.join(images_path,'black.png'),os.path.join(images_path,'white.png') ]
+images_stt = [os.path.join(IMAGES_PATH,'black.png'),os.path.join(IMAGES_PATH,'white.png') ]
 
 
 # place stt image on top left
@@ -115,7 +118,7 @@ All_Images_Left = {}
 All_Images_Right = {}
 
 for shape in SHAPES:     
-    images = [os.path.join(images_path,f'{shape}_{color}.png') for color in CIRCLE_COLORS]
+    images = [os.path.join(IMAGES_PATH,f'{shape}_{color}.png') for color in CIRCLE_COLORS]
 
     All_Images_Left[shape] = keyboard.image_selector(shape, (CIRCLE_WIDTH * ppd, CIRCLE_HEIGHT * ppd), (x_pos_left,y_pos_both), images) 
     All_Images_Right[shape] = keyboard.image_selector(shape, (CIRCLE_WIDTH * ppd, CIRCLE_HEIGHT * ppd), (x_pos_right,y_pos_both), images)
@@ -126,7 +129,7 @@ All_Images = [stt_image,All_Images_Left,All_Images_Right]
 # Load sequences
 if code != "onoff":
 
-    tmp = np.load(os.path.join(project_path,'experiment','codes',f'{code}.npz'))["codes"]
+    tmp = np.load(os.path.join(PROJECT_PATH,'experiment','codes',f'{code}.npz'))["codes"]
 
 tmp = tmp.repeat(int(FR / PR), axis=0) # upsample the codes based on frame rate and presentation rate
   
@@ -151,7 +154,7 @@ else:
 keyboard.set_field_text("text", "")
 keyboard.set_field_text("text", "Press button to start.")
 print("Press button to start.")
-event.waitKeys(keyList=["c"])
+event.waitKeys(keyList=["c","s"])
 
 print("Starting.")
 # Start experiment
